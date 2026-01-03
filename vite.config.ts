@@ -5,7 +5,7 @@
 
   export default defineConfig({
     plugins: [react()],
-    base: "/PersuasiveTest",
+    base: process.env.VITE_BASE_PATH || "/Persuasive_Website",
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
