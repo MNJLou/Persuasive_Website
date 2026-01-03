@@ -58,7 +58,7 @@ export function HomePage({ onShopNow }: HomePageProps) {
 
         {/* Hero Content */}
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl mb-6">Custom Threads</h1>
+          <h1 className="text-5xl md:text-7xl mb-6">Persuasive</h1>
           <p className="text-xl md:text-2xl mb-8 text-gray-200">
             Express yourself with premium, customizable apparel
           </p>
