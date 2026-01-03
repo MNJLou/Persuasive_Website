@@ -85,7 +85,7 @@ export function HomePage({ onShopNow }: HomePageProps) {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-4xl md:text-5xl mb-6">Your Style, Your Way</h2>
             <p className="text-xl text-gray-600">
-              At Custom Threads, we believe that great clothing should be as unique as you are. 
+              At Persuasive, we believe that great clothing should be as unique as you are. 
               Choose your colors, add your personal touch, and wear something truly yours.
             </p>
           </div>
