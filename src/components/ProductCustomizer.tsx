@@ -168,6 +168,21 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
               {/* (Arrows removed) images will auto-cycle every 3 seconds */}
             </div>
           </div>
+          
+          {/* Thumbnail Gallery */}
+          <div className="relative w-full overflow-hidden">
+            <div className="flex gap-2 overflow-x-auto scroll-smooth max-w-full">
+              {getCurrentImages().map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`Shirt variant ${index + 1}`}
+                  className="w-20 h-20 flex-shrink-0 rounded-2xl object-cover cursor-pointer"
+                  onClick={() => setSelectedImageIndex(index)}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Product Details */}
