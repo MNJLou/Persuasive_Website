@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { Check } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Toaster } from './ui/sonner';
 
@@ -97,7 +97,9 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
     embroideryColorsByShirt['White'][0]
   );
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const basePrice = 69.69;
+  const [selectedSizeGuideImage, setSelectedSizeGuideImage] = useState(BlackPink_IMG_9123);
+  const [sizeGuideToastId, setSizeGuideToastId] = useState<string | number | null>(null);
+  const basePrice = 550.00;
 
   const getAvailableEmbroideryColors = () => {
     return embroideryColorsByShirt[selectedShirtColor.name] || [];
@@ -138,6 +140,56 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
     });
   };
 
+  const SizeGuideToast = ({ toastId }: { toastId: string | number }) => (
+    <div className="bg-white rounded-lg shadow-lg max-w-md mr-2 relative">
+      <button
+        onClick={() => toast.dismiss(toastId)}
+        className="absolute top-2 bg-white -right-1 mr-2 p-1 rounded-full shadow-md"
+        aria-label="Close"
+      >
+        <X className="w-8 h-8" />
+      </button>
+      <img
+        src={selectedSizeGuideImage}
+        alt="Size Guide"
+        className="w-full h-auto rounded-lg"
+      />
+      <Button variant="secondary"
+              className="mt-4 p-2 gap-2"
+              onClick={() => setSelectedSizeGuideImage(BlackPink_IMG_9123)}>
+        Small
+      </Button>
+      <Button variant="secondary"
+              className="mt-4 p-2 gap-2"
+              onClick={() => setSelectedSizeGuideImage(BlackPink_IMG_9125)}>
+        Medium
+      </Button>
+      <Button variant="secondary"
+              className="mt-4 p-2 gap-2"
+              onClick={() => setSelectedSizeGuideImage(BlackPink_IMG_9128)}>
+        Large
+      </Button>
+    </div>
+  );
+
+  const handleSizeGuide = () => {
+    const toastId = toast.custom((t) => <SizeGuideToast toastId={t} />, {
+      duration: Infinity,
+    });
+    setSizeGuideToastId(toastId);
+  };
+
+  // Update the toast when the size guide image changes
+  useEffect(() => {
+    if (sizeGuideToastId !== null) {
+      toast.dismiss(sizeGuideToastId);
+      const toastId = toast.custom((t) => <SizeGuideToast toastId={t} />, {
+        duration: Infinity,
+      });
+      setSizeGuideToastId(toastId);
+    }
+  }, [selectedSizeGuideImage]);
+
   // Auto-cycle images every 3 seconds for the current variant
   useEffect(() => {
     const images = getCurrentImages();
@@ -170,7 +222,7 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
           </div>
           
           {/* Thumbnail Gallery */}
-          <div className="relative w-full overflow-hidden">
+          <div className="relative py-2 w-full overflow-hidden">
             <div className="flex gap-2 overflow-x-auto scroll-smooth max-w-full">
               {getCurrentImages().map((image, index) => (
                 <img
@@ -264,6 +316,13 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
                   </button>
                 ))}
               </div>
+              <Button
+                onClick={handleSizeGuide}
+                variant="secondary"
+                className="mt-4 p-2 pr-4 gap-2"
+              >
+                Size Guide
+              </Button>
             </div>
 
             {/* Product Features */}
