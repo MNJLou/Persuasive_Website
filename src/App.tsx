@@ -31,8 +31,7 @@ export default function App() {
               onClick={handleBackToHome}
               className="flex items-center gap-2 hover:text-blue-600 transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span>Back to Home</span>
+              <ArrowLeft className="w-8 h-8" />
             </button>
             <h1 className="text-2xl">Persuasive</h1>
             <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">

@@ -413,12 +413,32 @@
     top: calc(var(--spacing) * 0);
   }
 
+  .top-2 {
+    top: calc(var(--spacing) * 2);
+  }
+
+  .-right-05 {
+    right: calc(var(--spacing) * -0.5);
+  }
+
   .-right-1 {
     right: calc(var(--spacing) * -1);
   }
 
+  .-right-2 {
+    right: calc(var(--spacing) * -2);
+  }
+
+  .-right-3 {
+    right: calc(var(--spacing) * -3);
+  }
+
   .bottom-8 {
     bottom: calc(var(--spacing) * 8);
+  }
+
+  .right-30 {
+    right: calc(var(--spacing) * 30);
   }
 
   .left-1\/2 {
@@ -443,6 +463,10 @@
 
   .mt-2 {
     margin-top: calc(var(--spacing) * 2);
+  }
+
+  .mt-4 {
+    margin-top: calc(var(--spacing) * 4);
   }
 
   .mb-2 {
@@ -471,6 +495,10 @@
 
   .ml-2 {
     margin-left: calc(var(--spacing) * 2);
+  }
+
+  .mr-2 {
+    margin-right: calc(var(--spacing) * 2);
   }
 
   .block {
@@ -575,6 +603,19 @@
     width: calc(var(--spacing) * 16);
   }
 
+  .w-20 {
+    width: calc(var(--spacing) * 20);
+  }
+
+  .w-40 {
+    width: calc(var(--spacing) * 40);
+  }
+
+  .w-60 {
+    width: calc(var(--spacing) * 60);
+  }
+
+
   .w-full {
     width: 100%;
   }
@@ -673,6 +714,14 @@
     overflow: hidden;
   }
 
+  .overflow-x-auto {
+    overflow-x: auto;
+  }
+
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+
   .rounded-2xl {
     border-radius: var(--radius-2xl);
   }
@@ -753,6 +802,10 @@
     object-fit: cover;
   }
 
+  .p-1 {
+    padding: calc(var(--spacing) * 1);
+  }
+
   .p-2 {
     padding: calc(var(--spacing) * 2);
   }
@@ -787,6 +840,10 @@
 
   .py-20 {
     padding-block: calc(var(--spacing) * 20);
+  }
+
+  .pr-2 {
+    padding-right: calc(var(--spacing) * 2);
   }
 
   .text-center {
@@ -1270,7 +1327,7 @@
   --popover-foreground: oklch(.145 0 0);
   --primary: #030213;
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(.95 .0058 264.53);
+  --secondary: oklch(84.573% 0.01001 273.322);
   --secondary-foreground: #030213;
   --muted: #ececf0;
   --muted-foreground: #717182;
@@ -1340,6 +1397,11 @@
 
 html {
   font-size: var(--font-size);
+}
+
+html, body {
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 @property --tw-translate-x {

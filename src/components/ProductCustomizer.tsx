@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { Check } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Toaster } from './ui/sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 
 // Import Black + Pink Embroidery
 import BlackPink_IMG_9123 from '../Shirt_Black_Pink_Embroidery/IMG_9123.jpg';
@@ -97,7 +104,10 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
     embroideryColorsByShirt['White'][0]
   );
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const basePrice = 69.69;
+  const [selectedSizeGuideImage, setSelectedSizeGuideImage] = useState(BlackPink_IMG_9123);
+  const [sizeGuideToastId, setSizeGuideToastId] = useState<string | number | null>(null);
+  const [selectedSize, setSelectedSize] = useState('Medium');
+  const basePrice = 550.00;
 
   const getAvailableEmbroideryColors = () => {
     return embroideryColorsByShirt[selectedShirtColor.name] || [];
@@ -138,6 +148,56 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
     });
   };
 
+  const SizeGuideToast = ({ toastId }: { toastId: string | number }) => (
+    <div className="bg-white rounded-lg shadow-lg max-w-md mr-2 relative">
+      <button
+        onClick={() => toast.dismiss(toastId)}
+        className="absolute top-2 bg-white -right-1 mr-2 p-1 rounded-full shadow-md"
+        aria-label="Close"
+      >
+        <X className="w-8 h-8" />
+      </button>
+      <img
+        src={selectedSizeGuideImage}
+        alt="Size Guide"
+        className="w-full h-auto rounded-lg"
+      />
+      <Button variant="secondary"
+              className="mt-4 p-2 gap-2"
+              onClick={() => setSelectedSizeGuideImage(BlackPink_IMG_9123)}>
+        Small
+      </Button>
+      <Button variant="secondary"
+              className="mt-4 p-2 gap-2"
+              onClick={() => setSelectedSizeGuideImage(BlackPink_IMG_9125)}>
+        Medium
+      </Button>
+      <Button variant="secondary"
+              className="mt-4 p-2 gap-2"
+              onClick={() => setSelectedSizeGuideImage(BlackPink_IMG_9128)}>
+        Large
+      </Button>
+    </div>
+  );
+
+  const handleSizeGuide = () => {
+    const toastId = toast.custom((t) => <SizeGuideToast toastId={t} />, {
+      duration: Infinity,
+    });
+    setSizeGuideToastId(toastId);
+  };
+
+  // Update the toast when the size guide image changes
+  useEffect(() => {
+    if (sizeGuideToastId !== null) {
+      toast.dismiss(sizeGuideToastId);
+      const toastId = toast.custom((t) => <SizeGuideToast toastId={t} />, {
+        duration: Infinity,
+      });
+      setSizeGuideToastId(toastId);
+    }
+  }, [selectedSizeGuideImage]);
+
   // Auto-cycle images every 3 seconds for the current variant
   useEffect(() => {
     const images = getCurrentImages();
@@ -166,6 +226,21 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
               />
               
               {/* (Arrows removed) images will auto-cycle every 3 seconds */}
+            </div>
+          </div>
+          
+          {/* Thumbnail Gallery */}
+          <div className="relative py-2 w-full overflow-hidden">
+            <div className="flex gap-2 overflow-x-auto scroll-smooth max-w-full">
+              {getCurrentImages().map((image, index) => (
+                <img
+                  key={index}
+                  src={image}
+                  alt={`Shirt variant ${index + 1}`}
+                  className="w-20 h-20 flex-shrink-0 rounded-2xl object-cover cursor-pointer"
+                  onClick={() => setSelectedImageIndex(index)}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -249,6 +324,31 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
                   </button>
                 ))}
               </div>
+
+              {/* Size Selection Dropdown */}
+              <div className="mt-6 mb-4 py-4">
+                <label className="block mb-2 font-medium">Size: <span className="text-gray-900">{selectedSize}</span></label>
+                <Select value={selectedSize} onValueChange={setSelectedSize}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Select a size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Small">Small</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="Large">Large</SelectItem>
+                    <SelectItem value="XL">XL</SelectItem>
+                    <SelectItem value="XXL">XXL</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button
+                onClick={handleSizeGuide}
+                variant="secondary"
+                className="mt-4 p-2 pr-4 gap-2"
+              >
+                Size Guide
+              </Button>
             </div>
 
             {/* Product Features */}

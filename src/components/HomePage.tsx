@@ -44,7 +44,7 @@ export function HomePage({ onShopNow }: HomePageProps) {
   return (
     <div className="min-h-screen">
       {/* Hero Section with Image Background */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative h-screen flex items-center justify-center overflow-y-hidden">
         {/* Image Background */}
         <div className="absolute inset-0 w-full h-full">
           <img
@@ -93,7 +93,7 @@ export function HomePage({ onShopNow }: HomePageProps) {
           {/* Image Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {randomImages.map((image, index) => (
-              <div key={index} className="group relative aspect-[3/4] overflow-hidden rounded-2xl shadow-lg">
+              <div key={index} className="group relative aspect-[3/4] overflow-y-hidden rounded-2xl shadow-lg">
                 <img
                   src={image}
                   alt="Custom apparel showcase"
