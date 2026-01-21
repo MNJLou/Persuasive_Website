@@ -3,6 +3,13 @@ import { Button } from './ui/button';
 import { Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Toaster } from './ui/sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 
 // Import Black + Pink Embroidery
 import BlackPink_IMG_9123 from '../Shirt_Black_Pink_Embroidery/IMG_9123.jpg';
@@ -99,6 +106,7 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSizeGuideImage, setSelectedSizeGuideImage] = useState(BlackPink_IMG_9123);
   const [sizeGuideToastId, setSizeGuideToastId] = useState<string | number | null>(null);
+  const [selectedSize, setSelectedSize] = useState('Medium');
   const basePrice = 550.00;
 
   const getAvailableEmbroideryColors = () => {
@@ -316,6 +324,24 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
                   </button>
                 ))}
               </div>
+
+              {/* Size Selection Dropdown */}
+              <div className="mt-6 mb-4 py-4">
+                <label className="block mb-2 font-medium">Size: <span className="text-gray-900">{selectedSize}</span></label>
+                <Select value={selectedSize} onValueChange={setSelectedSize}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Select a size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Small">Small</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="Large">Large</SelectItem>
+                    <SelectItem value="XL">XL</SelectItem>
+                    <SelectItem value="XXL">XXL</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Button
                 onClick={handleSizeGuide}
                 variant="secondary"
