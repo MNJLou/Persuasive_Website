@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { CartItem } from '../App';
 import { ArrowLeft } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ProceedCheckoutPageProps {
   cartItems: CartItem[];
@@ -36,8 +37,10 @@ export function ProceedCheckoutPage({ cartItems, onBack }: ProceedCheckoutPagePr
     postcode: '',
   });
 
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const subtotal = cartItems.reduce((total, item) => total + item.price, 0);
-  const taxRate = 0.1;
+  const taxRate = 0.15; // 15% tax
   const tax = subtotal * taxRate;
   const total = subtotal + tax;
 
@@ -49,10 +52,31 @@ export function ProceedCheckoutPage({ cartItems, onBack }: ProceedCheckoutPagePr
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
+
+    // Validate form data
+    if (!formData.firstName || !formData.surname || !formData.email || !formData.cellphone) {
+      toast.error('Please fill in all required billing details');
+      return;
+    }
+
+    if (!formData.streetAddress || !formData.suburb || !formData.city || !formData.postcode) {
+      toast.error('Please fill in all required delivery address fields');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+
+      // TODO: Implement payment processing with your preferred payment gateway
+      toast.info('Payment processing not yet configured. Please implement your payment gateway.');
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error(error instanceof Error ? error.message : 'An error occurred during checkout');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -166,27 +190,6 @@ export function ProceedCheckoutPage({ cartItems, onBack }: ProceedCheckoutPagePr
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Country / Region
-              </label>
-              <select
-                name="country"
-                value={formData.country}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select a country</option>
-                <option value="South Africa">South Africa</option>
-                <option value="Namibia">Namibia</option>
-                <option value="Botswana">Botswana</option>
-                <option value="Zimbabwe">Zimbabwe</option>
-                <option value="Lesotho">Lesotho</option>
-                <option value="Eswatini">Eswatini</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Street Address
               </label>
               <Input
@@ -256,14 +259,28 @@ export function ProceedCheckoutPage({ cartItems, onBack }: ProceedCheckoutPagePr
           </div>
         </div>
 
+        {/* Payment Section */}
+        <div className="lg:col-span-2">
+          <div className="border border-gray-300 rounded-lg p-6 bg-white">
+            <h2 className="text-2xl font-bold mb-6">Payment Details</h2>
+            
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+              <p className="text-yellow-800 text-sm">
+                Payment gateway is not yet configured. Please set up your preferred payment provider.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Full Width Submit Button */}
         <div className="lg:col-span-2 flex gap-4 pt-4">
           <Button
             type="submit"
             size="lg"
             className="flex-1"
+            disabled={isProcessing}
           >
-            Complete Order
+            {isProcessing ? 'Processing...' : `Complete Order (R${total.toFixed(2)})`}
           </Button>
           <Button
             type="button"
@@ -271,6 +288,7 @@ export function ProceedCheckoutPage({ cartItems, onBack }: ProceedCheckoutPagePr
             size="lg"
             onClick={onBack}
             className="flex-1"
+            disabled={isProcessing}
           >
             Cancel
           </Button>
