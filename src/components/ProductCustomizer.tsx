@@ -179,7 +179,7 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [sizeGuideToastId, setSizeGuideToastId] = useState<string | number | null>(null);
   const [selectedSize, setSelectedSize] = useState('Medium');
-  const basePrice = 20.00;
+  const basePrice = 550.00;
 
   const getAvailableEmbroideryColors = () => {
     return embroideryColorsByShirt[selectedShirtColor.name] || [];
