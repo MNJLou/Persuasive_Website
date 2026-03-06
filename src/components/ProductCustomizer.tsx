@@ -18,13 +18,16 @@ interface ProductCustomizerProps {
   onAddToCart: (item: CartItem) => void;
 }
 
-const shirtColors = [
+const sleevedShirtColors = [
   { name: 'White', value: '#FFFFFF', border: true },
   { name: 'Black', value: '#000000' },
   { name: 'Cream', value: '#F5E6D3' },
   { name: 'Grey', value: '#9CA3AF' },
   { name: 'Mint Green', value: '#A7F3D0' },
   { name: 'Pale Blue', value: '#BAE6FD' },
+];
+
+const sleevelessShirtColors = [
   { name: 'Grey Sleeveless', value: '#9CA3AF' },
   { name: 'Pale Blue Sleeveless', value: '#BAE6FD' },
 ];
@@ -248,16 +251,24 @@ const stockCounts: { [key: string]: number } = {
 };
 
 export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
-  const [selectedShirtColor, setSelectedShirtColor] = useState(shirtColors[0]);
+  const [selectedShirtColor, setSelectedShirtColor] = useState(sleevedShirtColors[0]);
   const [selectedEmbroideryColor, setSelectedEmbroideryColor] = useState(
     embroideryColorsByShirt['White'][0]
   );
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [selectedSize, setSelectedSize] = useState('Medium');
+  const [selectedSleeveType, setSelectedSleeveType] = useState('Sleeved');
   const [stockData, setStockData] = useState<{ color: string; size: string; stock: number }[]>([]);
-  const basePrice = 550.00;
 
+  const getAvailableShirtColors = () => {
+    return selectedSleeveType === 'Sleeved' ? sleevedShirtColors : sleevelessShirtColors;
+  };
+
+  const getPrice = () => {
+    const isSleeveless = selectedShirtColor.name.includes('Sleeveless');
+    return isSleeveless ? 450.00 : 550.00;
+  };
   
   // Load stock data on mount
   useEffect(() => {
@@ -315,13 +326,22 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
   };
 
 
-  const handleShirtColorChange = (color: typeof shirtColors[0]) => {
+  const handleShirtColorChange = (color: typeof sleevedShirtColors[0]) => {
     setSelectedShirtColor(color);
     setSelectedImageIndex(0);
     // Reset embroidery color to first available for new shirt color
     const availableColors = embroideryColorsByShirt[color.name];
     if (availableColors && availableColors.length > 0) {
       setSelectedEmbroideryColor(availableColors[0]);
+    }
+  };
+
+  const handleSleeveTypeChange = (sleeveType: string) => {
+    setSelectedSleeveType(sleeveType);
+    // Reset to first available color for the new sleeve type
+    const availableColors = sleeveType === 'Sleeved' ? sleevedShirtColors : sleevelessShirtColors;
+    if (availableColors.length > 0) {
+      handleShirtColorChange(availableColors[0]);
     }
   };
 
@@ -340,7 +360,7 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
       shirtColor: selectedShirtColor.name,
       embroideryColor: selectedEmbroideryColor.name,
       size: selectedSize,
-      price: basePrice,
+      price: getPrice(),
       image: getCurrentImage(),
     };
     onAddToCart(cartItem);
@@ -395,7 +415,7 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
         <div className="order-2 flex flex-col">
           <div className="flex-1">
             <h2 className="text-3xl lg:text-4xl mb-2">Premium Cotton Tee</h2>
-            <p className="text-2xl text-blue-600 mb-2">R{basePrice.toFixed(2)}</p>
+            <p className="text-2xl text-blue-600 mb-2">R{getPrice().toFixed(2)}</p>
             <b className="text text-green-600 font-semibold mb-6 "> Buy 2 shirts & get FREE shipping!</b>
             
             <p className="text-gray-600 mb-8">
@@ -406,10 +426,25 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
             {/* Shirt Color Selection */}
             <div className="mb-8">
               <label className="block mb-3">
-                Shirt Color: <span className="text-gray-900">{selectedShirtColor.name}</span>
+                Shirt Colour: <span className="text-gray-900">{selectedShirtColor.name}</span>
               </label>
+              
+              {/* Sleeve Type Dropdown */}
+              <div className="mb-4">
+                <label className="block mb-2 font-medium">Sleeve Type: <span className="text-gray-900">{selectedSleeveType}</span></label>
+                <Select value={selectedSleeveType} onValueChange={handleSleeveTypeChange}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Select sleeve type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Sleeved">Sleeved (R550)</SelectItem>
+                    <SelectItem value="Sleeveless">Sleeveless (R450)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="flex flex-wrap gap-3">
-                {shirtColors.slice(0, 6).map((color) => (
+                {getAvailableShirtColors().map((color) => (
                   <button
                     key={color.name}
                     onClick={() => handleShirtColorChange(color)}
@@ -423,34 +458,6 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
                     style={{ backgroundColor: color.value }}
                     aria-label={`Select ${color.name}`}
                   >
-                    {selectedShirtColor.name === color.name && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Check
-                          className="w-5 h-5"
-                          style={{
-                            color: color.name === 'White' ? '#000000' : '#FFFFFF',
-                          }}
-                        />
-                      </div>
-                    )}
-                  </button>
-                ))}
-                <div className="w-full h-px bg-gray-300 my-3"></div>
-                {shirtColors.slice(6).map((color) => (
-                  <button
-                    key={color.name}
-                    onClick={() => handleShirtColorChange(color)}
-                    className={`relative w-12 h-12 rounded-full transition-all ${
-                      color.border ? 'border-2 border-gray-300' : ''
-                    } ${
-                      selectedShirtColor.name === color.name
-                        ? 'ring-2 ring-blue-600 ring-offset-2 scale-110'
-                        : 'hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: color.value }}
-                    aria-label={`Select ${color.name}`}
-                  >
-                    
                     {selectedShirtColor.name === color.name && (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <Check
@@ -564,7 +571,7 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
             className="w-full"
             disabled={isOutOfStock(selectedSize)}
           >
-            {isOutOfStock(selectedSize) ? 'Out of Stock' : `Add to Cart - R${basePrice.toFixed(2)}`}
+            {isOutOfStock(selectedSize) ? 'Out of Stock' : `Add to Cart - R${getPrice().toFixed(2)}`}
           </Button>
         </div>
       </div>
