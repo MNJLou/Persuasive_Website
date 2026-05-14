@@ -1,6 +1,16 @@
 import { Button } from './ui/button';
+import { Input } from './ui/input';
 import { ArrowRight } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
 
 const ALL_IMAGES = [
   'https://images.persuasive.online/Hero%20Images/IMG_9319.jpg',
@@ -28,14 +38,56 @@ const ALL_IMAGES = [
 
 interface HomePageProps {
   onShopNow: () => void;
+  onAdminAccess: () => void;
 }
 
-export function HomePage({ onShopNow }: HomePageProps) {
+export function HomePage({ onShopNow, onAdminAccess }: HomePageProps) {
   // Get 4 random images for the grid
   const randomImages = useMemo(() => {
     const shuffled = [...ALL_IMAGES].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, 4);
   }, []);
+
+  const [adminDialogOpen, setAdminDialogOpen] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminError, setAdminError] = useState('');
+  const [adminLoading, setAdminLoading] = useState(false);
+
+  const handleAdminSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminError('');
+    setAdminLoading(true);
+
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword }),
+      });
+
+      if (res.ok) {
+        sessionStorage.setItem('adminAuth', 'true');
+        setAdminDialogOpen(false);
+        setAdminPassword('');
+        toast.success('Admin access granted');
+        onAdminAccess();
+      } else {
+        setAdminError('Invalid password');
+      }
+    } catch (err) {
+      setAdminError('Login failed. Please try again.');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleDialogChange = (open: boolean) => {
+    setAdminDialogOpen(open);
+    if (!open) {
+      setAdminPassword('');
+      setAdminError('');
+    }
+  };
   return (
     <div className="min-h-screen">
 
@@ -161,6 +213,59 @@ export function HomePage({ onShopNow }: HomePageProps) {
           </Button>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-300 py-8 px-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-sm">© 2026 Persuasive. All rights reserved.</p>
+          <button
+            onClick={() => setAdminDialogOpen(true)}
+            className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
+          >
+            Admin
+          </button>
+        </div>
+      </footer>
+
+      {/* Admin Password Dialog */}
+      <Dialog open={adminDialogOpen} onOpenChange={handleDialogChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Staff Sign In</DialogTitle>
+            <DialogDescription>
+              Enter your password to continue.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleAdminSubmit} className="space-y-4">
+            <div>
+              <Input
+                type="password"
+                placeholder="Password"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                autoFocus
+                required
+              />
+              {adminError && (
+                <p className="mt-2 text-sm text-red-600">{adminError}</p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleDialogChange(false)}
+                disabled={adminLoading}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={adminLoading || !adminPassword}>
+                {adminLoading ? 'Verifying...' : 'Sign In'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
