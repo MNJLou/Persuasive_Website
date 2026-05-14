@@ -16,20 +16,21 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { 
-    email, 
-    firstName, 
-    surname, 
-    cellphone, 
-    streetAddress, 
-    apartment, 
-    suburb, 
-    city, 
-    postcode, 
+  const {
+    email,
+    firstName,
+    surname,
+    cellphone,
+    streetAddress,
+    apartment,
+    suburb,
+    city,
+    postcode,
     country,
-    cartItems, 
-    total, 
-    subtotal 
+    cartItems,
+    total,
+    subtotal,
+    isAdminOrder
   } = req.body;
 
   if (!email || !firstName || !cartItems || total === undefined) {
@@ -138,7 +139,7 @@ export default async function handler(req, res) {
         <body>
           <div class="container">
             <div class="header">
-              <h1>✓ Payment Successful!</h1>
+              <h1>✓ ${isAdminOrder ? 'Order Confirmed' : 'Payment Successful'}!</h1>
               <p>Thank you for your order, ${firstName}</p>
             </div>
 
@@ -297,6 +298,7 @@ export default async function handler(req, res) {
             <div class="header">
               <h1>🛍️ NEW ORDER RECEIVED</h1>
               <p>Order from: ${firstName} ${surname}</p>
+              ${isAdminOrder ? '<p style="display:inline-block; margin-top:10px; padding:6px 12px; background-color:#fef3c7; color:#92400e; border:1px solid #f59e0b; border-radius:4px; font-weight:bold; font-size:13px;">⚙️ ADMIN-PLACED ORDER (no payment processed)</p>' : ''}
             </div>
 
             {/* Customer Information */}
@@ -384,7 +386,7 @@ export default async function handler(req, res) {
     const ownerEmailResponse = await resend.emails.send({
       from: 'Persuasive Orders <alessandro@contact.persuasive.online>',
       to: 'alessandro.persuasive@gmail.com', // Replace with actual email
-      subject: `🛍️ New Order from ${firstName} ${surname} - R${total.toFixed(2)}`,
+      subject: `${isAdminOrder ? '[ADMIN] ' : ''}🛍️ New Order from ${firstName} ${surname} - R${total.toFixed(2)}`,
       html: ownerEmailHtml,
     });
 

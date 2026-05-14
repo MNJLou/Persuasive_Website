@@ -6,6 +6,7 @@ import { ProceedCheckoutPage } from './components/ProceedCheckoutPage';
 import { PaymentSuccess } from './components/PaymentSuccess';
 import { ShoppingCart, ArrowLeft } from 'lucide-react';
 import { AdminPanel } from './components/AdminPanel';
+import { AdminOrderPage } from './components/AdminOrderPage';
 
 export interface CartItem {
   id: string;
@@ -18,7 +19,7 @@ export interface CartItem {
 
 export default function App() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [currentPage, setCurrentPage] = useState<'home' | 'shop' | 'checkout' | 'proceed-checkout' | 'checkout-success' | 'admin'>(() => {
+  const [currentPage, setCurrentPage] = useState<'home' | 'shop' | 'checkout' | 'proceed-checkout' | 'checkout-success' | 'admin' | 'admin-order'>(() => {
   // Check URL path for admin
   if (window.location.pathname === '/admin') {
     return 'admin';
@@ -92,6 +93,11 @@ useEffect(() => {
     setCartItems(cartItems.filter(item => item.id !== itemId));
   };
 
+  const handleAdminAccess = () => {
+    setCurrentPage('admin-order');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Show header only on shop page */}
@@ -152,11 +158,29 @@ useEffect(() => {
         </header>
       )}
 
+      {/* Show header on admin order page */}
+      {currentPage === 'admin-order' && (
+        <header className="bg-white shadow-sm sticky top-0 z-10 border-b-2 border-amber-400">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <button
+              onClick={handleBackToHome}
+              className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+            >
+              <ArrowLeft className="w-8 h-8" />
+            </button>
+            <h1 className="text-2xl">Admin Order</h1>
+            <div className="w-10" />
+          </div>
+        </header>
+      )}
+
       {/* Main Content */}
       {currentPage === 'admin' ? (
         <AdminPanel onBack={handleBackToHome} />
+      ) : currentPage === 'admin-order' ? (
+        <AdminOrderPage onBack={handleBackToHome} />
       ) : currentPage === 'home' ? (
-        <HomePage onShopNow={handleShopNow} />
+        <HomePage onShopNow={handleShopNow} onAdminAccess={handleAdminAccess} />
       ) : currentPage === 'checkout' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
           <CheckoutPage cartItems={cartItems} onRemoveFromCart={handleRemoveFromCart} onProceedCheckout={handleProceedCheckout} />
