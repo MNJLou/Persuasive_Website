@@ -1,16 +1,8 @@
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { ArrowRight } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { ArrowRight, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from './ui/dialog';
 
 const ALL_IMAGES = [
   'https://images.persuasive.online/Hero%20Images/IMG_9319.jpg',
@@ -88,6 +80,24 @@ export function HomePage({ onShopNow, onAdminAccess }: HomePageProps) {
       setAdminError('');
     }
   };
+
+  // Close on Escape + lock body scroll while overlay is open
+  useEffect(() => {
+    if (!adminDialogOpen) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleDialogChange(false);
+    };
+    window.addEventListener('keydown', onKey);
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [adminDialogOpen]);
   return (
     <div className="min-h-screen">
 
@@ -227,45 +237,67 @@ export function HomePage({ onShopNow, onAdminAccess }: HomePageProps) {
         </div>
       </footer>
 
-      {/* Admin Password Dialog */}
-      <Dialog open={adminDialogOpen} onOpenChange={handleDialogChange}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Staff Sign In</DialogTitle>
-            <DialogDescription>
-              Enter your password to continue.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleAdminSubmit} className="space-y-4">
-            <div>
-              <Input
-                type="password"
-                placeholder="Password"
-                value={adminPassword}
-                onChange={(e) => setAdminPassword(e.target.value)}
-                autoFocus
-                required
-              />
-              {adminError && (
-                <p className="mt-2 text-sm text-red-600">{adminError}</p>
-              )}
+      {/* Admin Password Overlay — full-viewport using 100dvh so iOS Safari's URL bar never overlaps */}
+      {adminDialogOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="admin-dialog-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in-0"
+          style={{ height: '100dvh' }}
+          onClick={() => handleDialogChange(false)}
+        >
+          <div
+            className="relative w-full max-w-md rounded-lg border bg-background p-6 shadow-lg animate-in zoom-in-95"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => handleDialogChange(false)}
+              className="absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100"
+              aria-label="Close"
+            >
+              <X className="size-4" />
+            </button>
+            <div className="flex flex-col gap-2 text-center sm:text-left">
+              <h2 id="admin-dialog-title" className="text-lg leading-none font-semibold">
+                Staff Sign In
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                Enter your password to continue.
+              </p>
             </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleDialogChange(false)}
-                disabled={adminLoading}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={adminLoading || !adminPassword}>
-                {adminLoading ? 'Verifying...' : 'Sign In'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+            <form onSubmit={handleAdminSubmit} className="space-y-4 mt-4">
+              <div>
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  autoFocus
+                  required
+                />
+                {adminError && (
+                  <p className="mt-2 text-sm text-red-600">{adminError}</p>
+                )}
+              </div>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleDialogChange(false)}
+                  disabled={adminLoading}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={adminLoading || !adminPassword}>
+                  {adminLoading ? 'Verifying...' : 'Sign In'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
