@@ -51,14 +51,21 @@ export default async function handler(req, res) {
     const resend = new Resend(process.env.RESEND_API_KEY);
     console.log("✅ Resend initialized successfully");
 
-    // Format order items for email
+    // Format order items for email. Caps read differently from tees.
+    const describeItem = (item) => {
+      if (item.productType === 'cap' || item.productName === 'Cap') {
+        return `${item.productName || 'Cap'} — ${item.shirtColor} / ${item.embroideryColor} thread (${item.size})`;
+      }
+      return `${item.shirtColor} shirt with ${item.embroideryColor} embroidery (${item.size})`;
+    };
+
     const orderItemsHtml = cartItems
       .map(
         (item) =>
           `
       <tr>
         <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">
-          ${item.shirtColor} shirt with ${item.embroideryColor} embroidery (${item.size})
+          ${describeItem(item)}
         </td>
         <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">
           R${item.price.toFixed(2)}

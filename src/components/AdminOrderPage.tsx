@@ -5,6 +5,7 @@ import { Input } from './ui/input';
 import { CartItem } from '../App';
 import { CheckCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { itemTitle, itemVariant } from './CheckoutPage';
 
 interface AdminOrderPageProps {
   onBack: () => void;
@@ -188,7 +189,7 @@ export function AdminOrderPage({ onBack }: AdminOrderPageProps) {
             {cartItems.map((item) => (
               <div key={item.id} className="flex justify-between items-center text-sm">
                 <span>
-                  {item.shirtColor} shirt with {item.embroideryColor} embroidery ({item.size})
+                  {itemTitle(item)} — {itemVariant(item)} ({item.size})
                 </span>
                 <div className="flex items-center gap-4">
                   <span>R{item.price.toFixed(2)}</span>

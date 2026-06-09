@@ -1,120 +1,91 @@
+// ============================================================
+// PERSUASIVE — Cart (redesigned). Charge model preserved:
+// total = subtotal; shipping is calculated offline (Buy 2 = free).
+// ============================================================
 import { CartItem } from '../App';
-import { Button } from './ui/button';
-import { Trash2 } from 'lucide-react';
+import { Icon } from './persuasive/ui';
 
 interface CheckoutPageProps {
   cartItems: CartItem[];
   onRemoveFromCart: (itemId: string) => void;
   onProceedCheckout: () => void;
+  onShop: () => void;
 }
 
-export function CheckoutPage({ cartItems, onRemoveFromCart, onProceedCheckout }: CheckoutPageProps) {
-  const subtotal = cartItems.reduce((total, item) => total + item.price, 0);
+export function itemTitle(item: CartItem) {
+  return item.productName || 'Premium Cotton Tee';
+}
+export function itemVariant(item: CartItem) {
+  return `${item.shirtColor} · ${item.embroideryColor} thread`;
+}
+
+export function CheckoutPage({ cartItems, onRemoveFromCart, onProceedCheckout, onShop }: CheckoutPageProps) {
+  const subtotal = cartItems.reduce((t, i) => t + i.price, 0);
   const total = subtotal;
+  const freeShip = cartItems.length >= 2;
+  const oneAway = cartItems.length === 1;
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-96 flex flex-col items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">Your cart is empty</h2>
-          <p className="text-gray-600 mb-8">Add some shirts to get started!</p>
-          <Button asChild>
-            <a href="#" onClick={(e) => {
-              e.preventDefault();
-              window.history.back();
-            }}>Continue Shopping</a>
-          </Button>
+      <div className="psv">
+        <div className="wrap section center" style={{ minHeight: '58vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24 }}>
+          <div className="display" style={{ fontSize: 'clamp(40px,8vw,96px)' }}>EMPTY<br />CART</div>
+          <p className="dim" style={{ maxWidth: 360 }}>Nothing here yet. Head to the customizer and build your colourway.</p>
+          <button className="btn btn-lg" onClick={onShop}>Start customizing <Icon.Arrow className="arrow" /></button>
         </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <h1 className="text-4xl font-bold mb-8">Your Cart</h1>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Cart Items */}
-        <div className="lg:col-span-2">
-          <div className="space-y-6">
-            {cartItems.map((item) => (
-              <div
-                key={item.id}
-                className="flex gap-6 border rounded-lg p-6 bg-white shadow-sm"
-              >
-                {/* Product Image */}
-                <div className="flex-shrink-0 w-24 h-24">
-                  <img
-                    src={item.image}
-                    alt="Shirt"
-                    className="w-full h-full object-cover rounded-lg"
-                  />
+    <div className="psv wrap section" style={{ paddingTop: 48 }}>
+      <div className="spread" style={{ marginBottom: 34, alignItems: 'flex-end' }}>
+        <h1 className="display" style={{ fontSize: 'clamp(34px,6vw,72px)' }}>Cart</h1>
+        <span className="mono dim">{cartItems.length} item{cartItems.length > 1 ? 's' : ''}</span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.6fr) minmax(0,0.8fr)', gap: 'clamp(28px,4vw,60px)', alignItems: 'start' }} className="cart-grid">
+        <div style={{ borderTop: '1px solid var(--ink)' }}>
+          {cartItems.map((it) => (
+            <div key={it.id} className="row" style={{ gap: 20, padding: '22px 0', borderBottom: '1px solid var(--line)', alignItems: 'stretch' }}>
+              <div style={{ width: 86, height: 104, flex: '0 0 auto', border: '1px solid var(--line)', overflow: 'hidden', background: it.swatch || 'var(--paper-2)' }}>
+                <img src={it.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+              <div className="stack" style={{ flex: 1, justifyContent: 'center', gap: 8 }}>
+                <div className="spread">
+                  <span className="display" style={{ fontSize: 20 }}>{itemTitle(it)}</span>
+                  <span className="display" style={{ fontSize: 18 }}>R{it.price.toFixed(0)}</span>
                 </div>
-
-                {/* Product Details */}
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">Premium Cotton Tee</h3>
-                  <div className="text-gray-600 space-y-1">
-                    <p>
-                      <span className="font-medium">Color:</span> {item.shirtColor}
-                    </p>
-                    <p>
-                      <span className="font-medium">Embroidery:</span>{' '}
-                      {item.embroideryColor}
-                    </p>
-                    <p>
-                      <span className="font-medium">Size:</span> {item.size}
-                    </p>
-                    <p className="text-lg font-semibold text-blue-600 mt-3">
-                      R{item.price.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Remove Button */}
-                <div className="flex-shrink-0 flex items-center">
-                  <button
-                    onClick={() => onRemoveFromCart(item.id)}
-                    className="p-2 hover:bg-red-100 hover:text-red-600 rounded-lg transition-colors"
-                    aria-label="Remove from cart"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                <span className="mono-sm dim">{itemVariant(it)}</span>
+                <div className="row" style={{ gap: 14, marginTop: 4 }}>
+                  <span className="tag">Size {it.size}</span>
+                  <button className="navlink row" style={{ gap: 7, color: 'var(--muted)' }} onClick={() => onRemoveFromCart(it.id)}><Icon.Trash size={14} /> Remove</button>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
-        {/* Order Summary */}
-        <div className="lg:col-span-1">
-          <div className="bg-gray-50 rounded-lg p-6 sticky top-24">
-            <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
-
-            <div className="space-y-4 mb-6 pb-6 border-b">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Items</span>
-                <span className="font-medium">{cartItems.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">R{subtotal.toFixed(2)}</span>
-              </div>
+        <div style={{ border: '1px solid var(--ink)', position: 'sticky', top: 90 }}>
+          <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--ink)', background: 'var(--ink)' }}>
+            <span className="mono" style={{ color: 'var(--paper)' }}>Order summary</span>
+          </div>
+          <div style={{ padding: '22px' }}>
+            <div className="spread" style={{ marginBottom: 14 }}><span className="dim" style={{ fontSize: 14 }}>Subtotal</span><span style={{ fontSize: 15 }}>R{subtotal.toFixed(2)}</span></div>
+            <div className="spread" style={{ marginBottom: 14 }}>
+              <span className="dim" style={{ fontSize: 14 }}>Shipping</span>
+              <span style={{ fontSize: 13 }}>{freeShip ? <span style={{ color: 'var(--accent)' }}>FREE</span> : <span className="dim">Calculated after order</span>}</span>
             </div>
-
-            <div className="flex justify-between mb-6">
-              <span className="text-lg font-bold">Total</span>
-              <span className="text-xl font-bold text-blue-600">
-                R{total.toFixed(2)}
-              </span>
+            {oneAway && (
+              <div className="tag" style={{ width: '100%', justifyContent: 'center', marginBottom: 16, borderStyle: 'dashed' }}>Add 1 more → free shipping</div>
+            )}
+            <hr className="rule rule-ink" style={{ margin: '16px 0' }} />
+            <div className="spread" style={{ marginBottom: 6 }}>
+              <span className="display" style={{ fontSize: 20 }}>Total</span>
+              <span className="display" style={{ fontSize: 24 }}>R{total.toFixed(2)}</span>
             </div>
-
-            <Button className="w-full mb-3" size="lg" onClick={onProceedCheckout}>
-              Proceed to Checkout
-            </Button>
-            <Button variant="outline" className="w-full" size="lg">
-              Continue Shopping
-            </Button>
+            <p className="mono-sm dim" style={{ marginBottom: 18 }}>Excludes shipping</p>
+            <button className="btn btn-block btn-lg" onClick={onProceedCheckout}>Checkout <Icon.Arrow className="arrow" /></button>
+            <button className="navlink" style={{ marginTop: 16, display: 'block' }} onClick={onShop}>Continue shopping</button>
           </div>
         </div>
       </div>
