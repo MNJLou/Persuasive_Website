@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { Toaster } from './components/ui/sonner';
 import { ProductCustomizer } from './components/ProductCustomizer';
 import { HomePage } from './components/HomePage';
 import { CheckoutPage } from './components/CheckoutPage';
 import { ProceedCheckoutPage } from './components/ProceedCheckoutPage';
 import { PaymentSuccess } from './components/PaymentSuccess';
-import { ShoppingCart, ArrowLeft } from 'lucide-react';
 import { AdminPanel } from './components/AdminPanel';
 import { AdminOrderPage } from './components/AdminOrderPage';
+import { Header, CrumbBar, Footer, Icon } from './components/persuasive/ui';
 
 export interface CartItem {
   id: string;
@@ -15,188 +17,159 @@ export interface CartItem {
   size: string;
   price: number;
   image: string;
+  // Display extras (optional — backend ignores these; shirtColor/embroideryColor/size remain the contract)
+  productType?: 'tee' | 'cap';
+  productName?: string;
+  swatch?: string;
+  embSwatch?: string;
 }
+
+type Page = 'home' | 'shop' | 'checkout' | 'proceed-checkout' | 'checkout-success' | 'admin' | 'admin-order';
 
 export default function App() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [currentPage, setCurrentPage] = useState<'home' | 'shop' | 'checkout' | 'proceed-checkout' | 'checkout-success' | 'admin' | 'admin-order'>(() => {
-  // Check URL path for admin
-  if (window.location.pathname === '/admin') {
-    return 'admin';
-  }
-  
-  // Check if we're returning from Yoco with success
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('payment') === 'success') {
-    return 'checkout-success';
-  }
-  return 'home';
-});
+  const [currentPage, setCurrentPage] = useState<Page>(() => {
+    if (window.location.pathname === '/admin') return 'admin';
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') return 'checkout-success';
+    return 'home';
+  });
 
-  // Check for payment redirect on mount
+  // Admin auth modal
+  const [adminOpen, setAdminOpen] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminError, setAdminError] = useState('');
+  const [adminLoading, setAdminLoading] = useState(false);
+
+  // Payment redirect handling
   useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
-  const paymentStatus = params.get('payment');
-  
-  console.log("🔍 App.tsx - Payment status:", paymentStatus);
-  console.log("🔍 App.tsx - Full URL:", window.location.href);
-  
-  if (paymentStatus === 'success') {
-    console.log("✅ Payment success detected in App.tsx");
-    setCurrentPage('checkout-success');
-    setCartItems([]); // Clear cart after successful payment
-    // Don't clean up URL here - let PaymentSuccess component do it
-  } else if (paymentStatus === 'cancelled' || paymentStatus === 'failed') {
-    console.log("❌ Payment cancelled/failed");
-    // Optionally handle cancelled/failed payments
-    // Clean up URL
-    window.history.replaceState({}, '', window.location.pathname);
-  }
-}, []);
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get('payment');
+    if (paymentStatus === 'success') {
+      setCurrentPage('checkout-success');
+      setCartItems([]);
+    } else if (paymentStatus === 'cancelled' || paymentStatus === 'failed') {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
-useEffect(() => {
-  const handlePopState = () => {
-    if (window.location.pathname === '/admin') {
-      setCurrentPage('admin');
+  useEffect(() => {
+    const handlePopState = () => {
+      if (window.location.pathname === '/admin') setCurrentPage('admin');
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Lock scroll + Escape close for the admin modal
+  useEffect(() => {
+    if (!adminOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeAdmin(); };
+    window.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [adminOpen]);
+
+  const go = (p: Page) => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+
+  const handleAddToCart = (item: CartItem) => {
+    setCartItems((c) => [...c, { ...item, id: Date.now().toString() + Math.random().toString(36).slice(2) }]);
+  };
+  const handleRemoveFromCart = (itemId: string) => setCartItems((c) => c.filter((i) => i.id !== itemId));
+
+  const closeAdmin = () => { setAdminOpen(false); setAdminPassword(''); setAdminError(''); };
+
+  const handleAdminSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminError('');
+    setAdminLoading(true);
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: adminPassword }),
+      });
+      if (res.ok) {
+        sessionStorage.setItem('adminAuth', 'true');
+        closeAdmin();
+        toast.success('Admin access granted');
+        go('admin-order');
+      } else {
+        setAdminError('Invalid password');
+      }
+    } catch {
+      setAdminError('Login failed. Please try again.');
+    } finally {
+      setAdminLoading(false);
     }
   };
 
-  window.addEventListener('popstate', handlePopState);
-  return () => window.removeEventListener('popstate', handlePopState);
-}, []);
-
-  const handleAddToCart = (item: CartItem) => {
-    setCartItems([...cartItems, { ...item, id: Date.now().toString() }]);
-  };
-
-  const handleShopNow = () => {
-    setCurrentPage('shop');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleBackToHome = () => {
-    setCurrentPage('home');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleCheckout = () => {
-    setCurrentPage('checkout');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleProceedCheckout = () => {
-    setCurrentPage('proceed-checkout');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleRemoveFromCart = (itemId: string) => {
-    setCartItems(cartItems.filter(item => item.id !== itemId));
-  };
-
-  const handleAdminAccess = () => {
-    setCurrentPage('admin-order');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const showChrome = ['home', 'shop', 'checkout', 'proceed-checkout'].includes(currentPage);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Show header only on shop page */}
-      {currentPage === 'shop' && (
-        <header className="bg-white shadow-sm sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <button
-              onClick={handleBackToHome}
-              className="flex items-center gap-2 hover:text-blue-600 transition-colors"
-            >
-              <ArrowLeft className="w-8 h-8" />
-            </button>
-            <h1 className="text-2xl">Persuasive</h1>
-            <button 
-              onClick={handleCheckout}
-              className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ShoppingCart className="w-6 h-6" />
-              {cartItems.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {cartItems.length}
-                </span>
-              )}
-            </button>
-          </div>
-        </header>
+    <div className="psv" style={{ minHeight: '100vh', background: 'var(--paper)' }}>
+      <Toaster />
+
+      {showChrome && (
+        <Header
+          cartCount={cartItems.length}
+          onHome={() => go('home')}
+          onShop={() => go('shop')}
+          onCart={() => go('checkout')}
+        />
       )}
 
-      {/* Show header on checkout page with back button to shop */}
+      {currentPage === 'shop' && <CrumbBar onBack={() => go('home')} label="Customizer" right={<span className="mono-sm dim">Build</span>} />}
+      {currentPage === 'checkout' && <CrumbBar onBack={() => go('shop')} label="Cart" />}
+      {currentPage === 'proceed-checkout' && <CrumbBar onBack={() => go('checkout')} label="Order details" />}
+
+      {currentPage === 'home' && <HomePage onShopNow={() => go('shop')} />}
+      {currentPage === 'shop' && <ProductCustomizer onAddToCart={handleAddToCart} />}
       {currentPage === 'checkout' && (
-        <header className="bg-white shadow-sm sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <button
-              onClick={() => setCurrentPage('shop')}
-              className="flex items-center gap-2 hover:text-blue-600 transition-colors"
-            >
-              <ArrowLeft className="w-8 h-8" />
-            </button>
-            <h1 className="text-2xl">Checkout</h1>
-            <div className="w-10" />
-          </div>
-        </header>
+        <CheckoutPage
+          cartItems={cartItems}
+          onRemoveFromCart={handleRemoveFromCart}
+          onProceedCheckout={() => go('proceed-checkout')}
+          onShop={() => go('shop')}
+        />
       )}
+      {currentPage === 'proceed-checkout' && <ProceedCheckoutPage cartItems={cartItems} onBack={() => go('checkout')} />}
+      {currentPage === 'checkout-success' && <PaymentSuccess onBackToHome={() => go('home')} onContinueShopping={() => go('shop')} />}
+      {currentPage === 'admin' && <AdminPanel onBack={() => go('home')} />}
+      {currentPage === 'admin-order' && <AdminOrderPage onBack={() => go('home')} />}
 
-      {/* Show header on proceed checkout page */}
-      {currentPage === 'proceed-checkout' && (
-        <header className="bg-white shadow-sm sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <button
-              onClick={() => setCurrentPage('checkout')}
-              className="flex items-center gap-2 hover:text-blue-600 transition-colors"
-            >
-              <ArrowLeft className="w-8 h-8" />
-            </button>
-            <h1 className="text-2xl">Order Details</h1>
-            <div className="w-10" />
-          </div>
-        </header>
-      )}
+      {showChrome && <Footer onShop={() => go('shop')} onAdmin={() => setAdminOpen(true)} />}
 
-      {/* Show header on admin order page */}
-      {currentPage === 'admin-order' && (
-        <header className="bg-white shadow-sm sticky top-0 z-10 border-b-2 border-amber-400">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <button
-              onClick={handleBackToHome}
-              className="flex items-center gap-2 hover:text-blue-600 transition-colors"
-            >
-              <ArrowLeft className="w-8 h-8" />
-            </button>
-            <h1 className="text-2xl">Admin Order</h1>
-            <div className="w-10" />
-          </div>
-        </header>
-      )}
-
-      {/* Main Content */}
-      {currentPage === 'admin' ? (
-        <AdminPanel onBack={handleBackToHome} />
-      ) : currentPage === 'admin-order' ? (
-        <AdminOrderPage onBack={handleBackToHome} />
-      ) : currentPage === 'home' ? (
-        <HomePage onShopNow={handleShopNow} onAdminAccess={handleAdminAccess} />
-      ) : currentPage === 'checkout' ? (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-          <CheckoutPage cartItems={cartItems} onRemoveFromCart={handleRemoveFromCart} onProceedCheckout={handleProceedCheckout} />
-        </main>
-      ) : currentPage === 'proceed-checkout' ? (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-          <ProceedCheckoutPage cartItems={cartItems} onBack={() => setCurrentPage('checkout')} />
-        </main>
-      ) : currentPage === 'checkout-success' ? (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-          <PaymentSuccess onBackToHome={handleBackToHome} onContinueShopping={handleShopNow} />
-        </main>
-      ) : (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-          <ProductCustomizer onAddToCart={handleAddToCart} />
-        </main>
+      {/* Admin auth modal */}
+      {adminOpen && (
+        <div className="modal-back" onClick={closeAdmin}>
+          <form className="modal" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()} onSubmit={handleAdminSubmit}>
+            <button type="button" className="modal-x" onClick={closeAdmin} aria-label="Close"><Icon.Close size={15} /></button>
+            <div style={{ padding: '22px 24px', borderBottom: '1px solid var(--ink)' }}>
+              <div className="mono dim" style={{ marginBottom: 8 }}>Staff access</div>
+              <div className="display" style={{ fontSize: 26 }}>Sign in</div>
+            </div>
+            <div style={{ padding: 24 }}>
+              <label className="field-label">Password</label>
+              <input
+                className="input"
+                type="password"
+                value={adminPassword}
+                autoFocus
+                onChange={(e) => { setAdminPassword(e.target.value); setAdminError(''); }}
+                placeholder="••••••••"
+              />
+              {adminError && <p className="mono-sm" style={{ color: '#c0392b', marginTop: 10 }}>{adminError}</p>}
+              <button className="btn btn-block" style={{ marginTop: 18 }} type="submit" disabled={adminLoading || !adminPassword}>
+                {adminLoading ? 'Verifying…' : 'Enter dashboard'}
+              </button>
+            </div>
+          </form>
+        </div>
       )}
     </div>
   );

@@ -1,303 +1,119 @@
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { ArrowRight, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
-import { toast } from 'sonner';
-
-const ALL_IMAGES = [
-  'https://images.persuasive.online/Hero%20Images/IMG_9319.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9322.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9328.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9332.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9334.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9338.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9350.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9353.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9359.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9362.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9364.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9369.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9372.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9380.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9383.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9399.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9454.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9457.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9459.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9461.jpg',
-  'https://images.persuasive.online/Hero%20Images/IMG_9474.jpg',
-];
+// ============================================================
+// PERSUASIVE — Home page (raw streetwear monochrome redesign)
+// ============================================================
+import { useMemo } from 'react';
+import { HERO_IMAGES, BRAND_CITY } from './persuasive/data';
+import { Icon, useReveal } from './persuasive/ui';
 
 interface HomePageProps {
   onShopNow: () => void;
-  onAdminAccess: () => void;
 }
 
-export function HomePage({ onShopNow, onAdminAccess }: HomePageProps) {
-  // Get 4 random images for the grid
-  const randomImages = useMemo(() => {
-    const shuffled = [...ALL_IMAGES].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 4);
-  }, []);
+function shuffle<T>(arr: T[]): T[] {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
 
-  const [adminDialogOpen, setAdminDialogOpen] = useState(false);
-  const [adminPassword, setAdminPassword] = useState('');
-  const [adminError, setAdminError] = useState('');
-  const [adminLoading, setAdminLoading] = useState(false);
-
-  const handleAdminSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAdminError('');
-    setAdminLoading(true);
-
-    try {
-      const res = await fetch('/api/admin/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPassword }),
-      });
-
-      if (res.ok) {
-        sessionStorage.setItem('adminAuth', 'true');
-        setAdminDialogOpen(false);
-        setAdminPassword('');
-        toast.success('Admin access granted');
-        onAdminAccess();
-      } else {
-        setAdminError('Invalid password');
-      }
-    } catch (err) {
-      setAdminError('Login failed. Please try again.');
-    } finally {
-      setAdminLoading(false);
-    }
-  };
-
-  const handleDialogChange = (open: boolean) => {
-    setAdminDialogOpen(open);
-    if (!open) {
-      setAdminPassword('');
-      setAdminError('');
-    }
-  };
-
-  // Close on Escape + lock body scroll while overlay is open
-  useEffect(() => {
-    if (!adminDialogOpen) return;
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleDialogChange(false);
-    };
-    window.addEventListener('keydown', onKey);
-
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      window.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [adminDialogOpen]);
+function HeroFullbleed({ onShop, img }: { onShop: () => void; img: string }) {
   return (
-    <div className="min-h-screen">
-
-      {/* Hero Section with Image Background */}
-      <section className="relative h-screen flex items-center justify-center overflow-y-hidden">
-        {/* Image Background */}
-        <div className="absolute inset-0 w-full h-full">
-          <img
-            src={ALL_IMAGES[0]}
-            alt="Hero background"
-            className="w-full h-full object-cover"
-          />
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black/50" />
+    <section style={{ position: 'relative', height: '92vh', minHeight: 560, display: 'flex', alignItems: 'flex-end', overflow: 'hidden' }}>
+      <img src={img} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(12,12,12,.28) 0%, rgba(12,12,12,.12) 45%, rgba(12,12,12,.74) 100%)' }} />
+      <div className="wrap" style={{ position: 'relative', paddingBottom: 'clamp(40px,6vw,72px)', width: '100%' }}>
+        <div className="eyebrow-row mono" style={{ color: 'rgba(255,255,255,.85)', marginBottom: 22 }}>
+          <span className="ln"></span> Custom embroidered apparel — {BRAND_CITY}
         </div>
-
-        {/* Hero Content */}
-        <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl mb-6">Persuasive</h1>
-          <p className="text-xl md:text-2xl mb-8 text-gray-200">
-            Express yourself with premium, customizable apparel
+        <h1 className="display" style={{ color: '#fff', fontSize: 'clamp(60px,13vw,200px)', letterSpacing: '-0.02em' }}>PERSUASIVE</h1>
+        <div className="spread" style={{ flexWrap: 'wrap', gap: 24, marginTop: 30, alignItems: 'flex-end' }}>
+          <p style={{ color: 'rgba(255,255,255,.9)', maxWidth: 440, fontSize: 17, lineHeight: 1.5, margin: 0 }}>
+            Premium cotton, embroidered to order. Pick your colourway, choose your thread, wear something that is only yours.
           </p>
-          <Button
-            onClick={onShopNow}
-            size="lg"
-            className="bg-white text-black hover:bg-gray-100"
-          >
-            Shop Now <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
-          <p className="text-2xl md:text-xl py-4 mb-8 text-gray-200">
-            <b>Buy 2 and get free shipping</b>
-          </p>
+          <button className="btn btn-light btn-lg" onClick={onShop}>Enter the customizer <Icon.Arrow className="arrow" /></button>
         </div>
+      </div>
+    </section>
+  );
+}
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
-            <div className="w-1.5 h-3 bg-white rounded-full mt-2" />
+function MarqueeStrip() {
+  const items = ['Premium Cotton Tee — R550', 'Cap — R200', 'Buy 2 → Free Shipping', 'Embroidered To Order', 'Sleeveless — R450'];
+  const line = [...items, ...items];
+  return (
+    <div className="section-dark" style={{ padding: '16px 0', overflow: 'hidden', borderBlock: '1px solid rgba(255,255,255,.16)' }}>
+      <div style={{ display: 'flex', gap: 38, whiteSpace: 'nowrap', animation: 'marq 26s linear infinite', width: 'max-content' }}>
+        {line.map((t, i) => (
+          <span key={i} className="mono" style={{ color: 'var(--paper)', display: 'inline-flex', gap: 38, alignItems: 'center' }}>{t} <span style={{ opacity: .4 }}>✳</span></span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function HomePage({ onShopNow }: HomePageProps) {
+  const revRef = useReveal();
+  const gridImgs = useMemo(() => shuffle(HERO_IMAGES).slice(0, 6), []);
+  const features = [
+    { icon: <Icon.Needle size={26} />, t: 'Embroidered to order', d: 'Every piece is stitched after you order — your colourway, your thread, no two the same.' },
+    { icon: <Icon.Cotton size={26} />, t: '100% organic cotton', d: 'Heavyweight, pre-shrunk and built to outlast the season. A premium hand-feel from the first wear.' },
+    { icon: <Icon.Truck size={26} />, t: '3—5 day dispatch', d: `Made and shipped from ${BRAND_CITY} within three to five business days. Buy two, shipping is on us.` },
+  ];
+
+  return (
+    <div ref={revRef} className="psv">
+      <HeroFullbleed onShop={onShopNow} img={gridImgs[0]} />
+
+      <MarqueeStrip />
+
+      {/* Brand story */}
+      <section className="section" id="story">
+        <div className="wrap">
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 'clamp(28px,5vw,80px)', alignItems: 'center' }} className="story-grid">
+            <div className="reveal">
+              <div className="eyebrow-row mono dim" style={{ marginBottom: 24 }}><span className="ln"></span> 01 — The idea</div>
+              <h2 className="display" style={{ fontSize: 'clamp(34px,5vw,68px)' }}>Your style,<br />your way.</h2>
+              <p style={{ fontSize: 18, color: 'var(--muted)', maxWidth: 480, marginTop: 22 }}>
+                We believe great clothing should be as unique as the person wearing it. Choose your colours, add your thread, and wear something truly yours — made one piece at a time.
+              </p>
+              <button className="btn btn-ghost" style={{ marginTop: 28 }} onClick={onShopNow}>Build yours <Icon.Arrow className="arrow" /></button>
+            </div>
+            <div className="reveal" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              {gridImgs.slice(0, 4).map((im, i) => (
+                <div key={i} style={{ aspectRatio: '3/4', overflow: 'hidden', border: '1px solid var(--line)', transform: i % 2 ? 'translateY(22px)' : 'none' }}>
+                  <img src={im} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Brand Story Section */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-4xl md:text-5xl mb-6">Your Style, Your Way</h2>
-            <p className="text-xl text-gray-600">
-              At Persuasive, we believe that great clothing should be as unique as you are. 
-              Choose your colors, add your personal touch, and wear something truly yours.
-            </p>
-          </div>
-
-          {/* Image Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {randomImages.map((image, index) => (
-              <div key={index} className="group relative aspect-[3/4] overflow-y-hidden rounded-2xl shadow-lg">
-                <img
-                  src={image}
-                  alt="Custom apparel showcase"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+      {/* Features */}
+      <section className="section" style={{ background: 'var(--paper-2)', borderBlock: '1px solid var(--line)' }}>
+        <div className="wrap">
+          <div className="eyebrow-row mono dim reveal" style={{ marginBottom: 40 }}><span className="ln"></span> 02 — Why Persuasive</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0, borderTop: '1px solid var(--ink)' }} className="feat-grid">
+            {features.map((f, i) => (
+              <div key={i} className="reveal" style={{ padding: '40px 32px 40px 0', borderRight: i < 2 ? '1px solid var(--line)' : 'none', display: 'flex', flexDirection: 'column', gap: 18 }}>
+                <div className="spread"><span style={{ color: 'var(--ink)' }}>{f.icon}</span><span className="mono-sm dim">0{i + 1}</span></div>
+                <h3 className="display" style={{ fontSize: 24 }}>{f.t}</h3>
+                <p style={{ color: 'var(--muted)', fontSize: 15, margin: 0 }}>{f.d}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 px-4 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                </svg>
-              </div>
-              <h3 className="text-2xl mb-3">Fully Customizable</h3>
-              <p className="text-gray-600">
-                Choose from multiple shirt colors and embroidery options to create your perfect look
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl mb-3">Premium Quality</h3>
-              <p className="text-gray-600">
-                100% organic cotton ensures comfort, durability, and a perfect fit every time
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl mb-3">Fast Delivery</h3>
-              <p className="text-gray-600">
-                Your custom creation ships within 3-5 business days, ready to wear
-              </p>
-            </div>
+      {/* CTA */}
+      <section className="section section-dark center">
+        <div className="wrap">
+          <div className="eyebrow-row mono reveal" style={{ color: 'rgba(255,255,255,.6)', justifyContent: 'center', marginBottom: 26 }}>
+            <span className="ln" style={{ flexBasis: 30 }}></span> Ready when you are <span className="ln" style={{ flexBasis: 30 }}></span>
+          </div>
+          <h2 className="display reveal" style={{ color: 'var(--paper)', fontSize: 'clamp(40px,8vw,120px)' }}>MAKE<br />IT YOURS</h2>
+          <div className="reveal" style={{ marginTop: 34 }}>
+            <button className="btn btn-light btn-lg" onClick={onShopNow}>Customize your fit <Icon.Arrow className="arrow" /></button>
           </div>
         </div>
       </section>
-
-      {/* CTA Section */}
-      <section className="py-20 px-4 bg-blue-600 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl mb-6">Ready to Create Your Look?</h2>
-          <p className="text-xl mb-8 text-blue-100">
-            Start customizing your perfect t-shirt today
-          </p>
-          <Button
-            onClick={onShopNow}
-            size="lg"
-            className="bg-white text-blue-600 hover:bg-gray-100"
-          >
-            Customize Your Shirt <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-8 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm">© 2026 Persuasive. All rights reserved.</p>
-          <button
-            onClick={() => setAdminDialogOpen(true)}
-            className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
-          >
-            Admin
-          </button>
-        </div>
-      </footer>
-
-      {/* Admin Password Overlay — full-viewport using 100dvh so iOS Safari's URL bar never overlaps */}
-      {adminDialogOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="admin-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in-0"
-          style={{ height: '100dvh' }}
-          onClick={() => handleDialogChange(false)}
-        >
-          <div
-            className="relative w-full max-w-md rounded-lg border bg-background p-6 shadow-lg animate-in zoom-in-95"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => handleDialogChange(false)}
-              className="absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100"
-              aria-label="Close"
-            >
-              <X className="size-4" />
-            </button>
-            <div className="flex flex-col gap-2 text-center sm:text-left">
-              <h2 id="admin-dialog-title" className="text-lg leading-none font-semibold">
-                Staff Sign In
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                Enter your password to continue.
-              </p>
-            </div>
-            <form onSubmit={handleAdminSubmit} className="space-y-4 mt-4">
-              <div>
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  autoFocus
-                  required
-                />
-                {adminError && (
-                  <p className="mt-2 text-sm text-red-600">{adminError}</p>
-                )}
-              </div>
-              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => handleDialogChange(false)}
-                  disabled={adminLoading}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={adminLoading || !adminPassword}>
-                  {adminLoading ? 'Verifying...' : 'Sign In'}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

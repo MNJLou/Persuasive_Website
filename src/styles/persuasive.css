@@ -1,0 +1,274 @@
+/* ============================================================
+   PERSUASIVE — Raw streetwear monochrome design system
+   Ported from the Persuasive_Redesign handoff prototype.
+   Loaded after index.css so these tokens/classes win globally.
+   ============================================================ */
+
+:root {
+  /* palette */
+  --ink: #0c0c0c;
+  --ink-soft: #1a1a1a;
+  --paper: #f2efe7;
+  --paper-2: #e9e5da;
+  --white: #ffffff;
+  --line: rgba(12, 12, 12, 0.16);
+  --line-strong: rgba(12, 12, 12, 0.42);
+  --muted: #6c6962;
+  --muted-2: #908d85;
+  --accent: #0c0c0c;          /* monochrome accent */
+  --accent-ink: #ffffff;       /* readable text on accent */
+
+  /* type */
+  --font-body: 'Archivo', system-ui, sans-serif;
+  --font-head: 'Archivo', system-ui, sans-serif;
+  --head-vary: 'wdth' 125;     /* expanded archivo by default */
+  --head-weight: 800;
+  --font-mono: 'Space Mono', ui-monospace, monospace;
+
+  /* metrics */
+  --maxw: 1320px;
+  --gutter: clamp(20px, 4vw, 56px);
+  --radius: 0px;               /* sharp, industrial */
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.psv img { display: block; max-width: 100%; }
+.psv button { font-family: inherit; }
+
+/* ---------- Headings / display ---------- */
+.display {
+  font-family: var(--font-head);
+  font-variation-settings: var(--head-vary);
+  font-weight: var(--head-weight);
+  text-transform: uppercase;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+/* heading-font variants set via [data-head] on <html> */
+html[data-head="chakra"] {
+  --font-head: 'Chakra Petch', sans-serif;
+  --head-vary: normal;
+  --head-weight: 700;
+}
+html[data-head="anton"] {
+  --font-head: 'Anton', sans-serif;
+  --head-vary: normal;
+  --head-weight: 400;
+}
+
+/* ---------- Mono micro-label / eyebrow ---------- */
+.mono {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 400;
+}
+.mono-sm { font-size: 10px; letter-spacing: 0.22em; }
+
+/* ---------- Layout helpers ---------- */
+.wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding-inline: var(--gutter); }
+.stack { display: flex; flex-direction: column; }
+.row { display: flex; align-items: center; }
+.spread { display: flex; align-items: center; justify-content: space-between; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 18px 28px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: var(--white);
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease, transform .18s ease, opacity .18s ease;
+  text-decoration: none;
+  line-height: 1;
+}
+.btn:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn:active { transform: translateY(1px); }
+.btn[disabled] { opacity: 0.32; cursor: not-allowed; pointer-events: none; }
+.btn .arrow { transition: transform .2s ease; }
+.btn:hover .arrow { transform: translateX(4px); }
+
+.btn-ghost {
+  background: transparent; color: var(--ink);
+}
+.btn-ghost:hover { background: var(--ink); color: var(--white); border-color: var(--ink); }
+
+.btn-light {
+  background: var(--white); color: var(--ink); border-color: var(--white);
+}
+.btn-light:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+.btn-block { width: 100%; }
+.btn-lg { padding: 22px 34px; font-size: 13px; }
+
+/* ---------- Links / nav ---------- */
+.navlink {
+  font-family: var(--font-mono); text-transform: uppercase;
+  letter-spacing: 0.16em; font-size: 12px; color: var(--ink);
+  background: none; border: none; cursor: pointer; padding: 6px 0; position: relative;
+}
+.navlink::after {
+  content: ''; position: absolute; left: 0; bottom: 0; height: 1px; width: 0; background: var(--ink);
+  transition: width .22s ease;
+}
+.navlink:hover::after { width: 100%; }
+
+/* ---------- Rules ---------- */
+.rule { height: 1px; background: var(--line); border: 0; width: 100%; }
+.rule-ink { background: var(--ink); }
+
+/* ---------- Tags / chips ---------- */
+.tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.16em;
+  font-size: 10px; padding: 7px 11px; border: 1px solid var(--line-strong);
+}
+
+/* swatch buttons */
+.swatch {
+  position: relative; width: 46px; height: 46px; border-radius: 50%;
+  cursor: pointer; border: 1px solid var(--line-strong);
+  transition: transform .15s ease, box-shadow .15s ease;
+  padding: 0;
+}
+.swatch:hover { transform: scale(1.06); }
+.swatch[data-active="true"] {
+  box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink);
+  transform: scale(1.06);
+}
+.swatch .tick {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+}
+
+/* segmented control */
+.seg { display: inline-flex; border: 1px solid var(--ink); }
+.seg button {
+  font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.12em;
+  font-size: 11px; font-weight: 700; padding: 13px 20px; background: transparent;
+  border: none; cursor: pointer; color: var(--ink); border-right: 1px solid var(--ink);
+}
+.seg button:last-child { border-right: none; }
+.seg button[data-active="true"] { background: var(--ink); color: var(--white); }
+
+/* select (native, styled) */
+.field-label { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.16em; font-size: 11px; color: var(--muted); display: block; margin-bottom: 10px; }
+.select {
+  appearance: none; -webkit-appearance: none;
+  font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; font-size: 12px;
+  padding: 14px 44px 14px 16px; border: 1px solid var(--ink); background: var(--white); color: var(--ink);
+  width: 100%; cursor: pointer; border-radius: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='black' stroke-width='1.4' fill='none'/></svg>");
+  background-repeat: no-repeat; background-position: right 16px center;
+}
+.input {
+  font-family: var(--font-body); font-size: 15px;
+  padding: 14px 16px; border: 1px solid var(--ink); background: var(--white); color: var(--ink);
+  width: 100%; border-radius: 0;
+}
+.input::placeholder { color: var(--muted-2); }
+.input:focus, .select:focus { outline: 2px solid var(--ink); outline-offset: -2px; }
+
+/* ---------- Sections ---------- */
+.section { padding-block: clamp(64px, 9vw, 130px); }
+.section-dark { background: var(--ink); color: var(--paper); }
+.section-dark .mono, .section-dark .field-label { color: rgba(255,255,255,0.6); }
+.section-dark .rule { background: rgba(255,255,255,0.18); }
+
+/* utility */
+.eyebrow-row { display:flex; align-items:center; gap:14px; }
+.eyebrow-row .ln { flex: 0 0 46px; height: 1px; background: currentColor; opacity:.5; }
+
+/* fade-in for sections */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+}
+
+/* scrollbar for thumbs */
+.thumbs::-webkit-scrollbar { height: 6px; }
+.thumbs::-webkit-scrollbar-thumb { background: var(--line-strong); }
+.thumbs::-webkit-scrollbar-track { background: transparent; }
+
+/* toast (used by sonner override is separate; kept for parity) */
+.toast-wrap { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 200; display:flex; flex-direction:column; gap:10px; align-items:center; }
+.toast {
+  background: var(--ink); color: var(--white); padding: 14px 22px;
+  font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.12em; font-size: 11px;
+  display: flex; align-items: center; gap: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.3);
+  animation: toastIn .3s ease;
+}
+@keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* modal */
+.modal-back { position: fixed; inset: 0; background: rgba(12,12,12,.72); z-index: 150; display:flex; align-items:center; justify-content:center; padding: 24px; animation: toastIn .2s ease; }
+.modal { background: var(--paper); max-width: 560px; width: 100%; position: relative; border: 1px solid var(--ink); }
+.modal-x { position: absolute; top: 14px; right: 14px; background: var(--ink); color: #fff; border: none; width: 34px; height: 34px; cursor: pointer; display:flex; align-items:center; justify-content:center; }
+
+/* marquee */
+@keyframes marq { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* product switcher tabs (customizer) */
+.prodtab { display:flex; align-items:center; gap:12px; padding:0 26px; height:100%; background:none; border:none; border-right:1px solid var(--line); cursor:pointer; border-bottom:2px solid transparent; }
+.prodtab[data-active="true"] { border-bottom-color: var(--ink); }
+.prodtab[data-active="false"] { opacity:.5; }
+.prodtab:hover { opacity:1; }
+
+/* admin orders table */
+.adminrow { display:grid; grid-template-columns:1.1fr 2fr 0.6fr 0.8fr 1fr; gap:16px; align-items:center; padding:16px 20px; }
+
+/* ---------- Responsive ---------- */
+/* Collapsed grids use minmax(0,1fr) — NOT plain 1fr — so the single
+   column can shrink below its content's intrinsic width. With plain 1fr
+   (= minmax(auto,1fr)) the product image / thumbnail strip would force the
+   column wider than the viewport and overflow instead of resizing. */
+@media (max-width: 900px) {
+  .cust-grid, .cart-grid, .story-grid, .feat-grid, .footer-grid, .form-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  /* let flex/grid children shrink instead of pushing the column wide */
+  .cust-grid > *, .cart-grid > *, .story-grid > * { min-width: 0 !important; }
+  .feat-grid > div { border-right: none !important; border-bottom: 1px solid var(--line); padding-right: 0 !important; }
+  .hero-split { grid-template-columns: minmax(0, 1fr) !important; }
+  .hero-split > div:last-child { min-height: 60vh; border-left: none !important; border-top: 1px solid var(--ink); }
+}
+@media (max-width: 720px) {
+  .cart-grid > div:last-child { position: static !important; }
+}
+@media (max-width: 560px) {
+  .feat-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .story-grid .reveal:last-child { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+
+/* ---------- Mobile polish pass ---------- */
+@media (max-width: 600px) {
+  /* let the sleeve segmented control wrap instead of overflowing */
+  .seg { flex-wrap: wrap; }
+  /* tighter header */
+  .psv-nav { gap: 18px !important; }
+  /* larger tap targets for swatches/sizes already 46px; keep */
+  .prodtab { padding: 0 16px; }
+  .adminrow { grid-template-columns: 1fr 1fr; }
+}
+
+/* helpers */
+.up { text-transform: uppercase; }
+.nowrap { white-space: nowrap; }
+.center { text-align: center; }
+.dim { color: var(--muted); }
