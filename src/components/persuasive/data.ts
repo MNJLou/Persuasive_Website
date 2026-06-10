@@ -110,6 +110,6 @@ export const capColorways: Colorway[] = [
   },
 ];
 
-export const CAP_PRICE = 200.0;
+export const CAP_PRICE = 150.0;
 
 export const BRAND_CITY = 'Johannesburg';

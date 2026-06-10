@@ -241,7 +241,10 @@ function CapCustomizer({ onAdd }: { onAdd: (i: CartItem) => void }) {
             <div className="mono dim" style={{ marginBottom: 12 }}>Headwear / 002 — New</div>
             <h1 className="display" style={{ fontSize: 'clamp(32px,4.4vw,56px)' }}>Cap</h1>
           </div>
-          <div className="display" style={{ fontSize: 34, whiteSpace: 'nowrap' }}>R{CAP_PRICE.toFixed(0)}</div>
+          <div style={{ textAlign: 'right' }}>
+            <div className="display" style={{ fontSize: 34, whiteSpace: 'nowrap' }}>R{CAP_PRICE.toFixed(0)}</div>
+            <div className="mono" style={{ fontSize: 13, color: 'var(--accent)', marginTop: 4, whiteSpace: 'nowrap' }}>34% off</div>
+          </div>
         </div>
 
         <div className="tag" style={{ alignSelf: 'flex-start', marginTop: 18, borderColor: 'var(--ink)' }}><Icon.Truck size={14} /> Buy 2 — Free shipping</div>
@@ -309,7 +312,7 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
             <span className="mono">Cotton Tee</span><span className="mono-sm dim">R550</span>
           </button>
           <button className="prodtab" data-active={tab === 'cap'} onClick={() => setTab('cap')}>
-            <span className="mono">Cap</span><span className="mono-sm" style={{ color: 'var(--accent)' }}>New · R200</span>
+            <span className="mono">Cap</span><span className="mono-sm" style={{ color: 'var(--accent)' }}>New · R150</span>
           </button>
         </div>
       </div>
