@@ -14,6 +14,11 @@ interface ProceedCheckoutPageProps {
   onBack: () => void;
 }
 
+// Promo codes → fractional discount on subtotal.
+export const PROMO_CODES: Record<string, number> = {
+  PER20: 0.20,
+};
+
 interface FormData {
   firstName: string;
   surname: string;
@@ -33,14 +38,38 @@ export function ProceedCheckoutPage({ cartItems, onBack }: ProceedCheckoutPagePr
     streetAddress: '', apartment: '', suburb: '', city: '', postcode: '',
   });
   const [isProcessing, setIsProcessing] = useState(false);
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; rate: number } | null>(null);
+  const [promoError, setPromoError] = useState('');
 
   const subtotal = cartItems.reduce((t, i) => t + i.price, 0);
-  const total = subtotal;
+  const discount = appliedPromo ? subtotal * appliedPromo.rate : 0;
+  const total = subtotal - discount;
   const freeShip = cartItems.length >= 2;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleApplyPromo = () => {
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+    const rate = PROMO_CODES[code];
+    if (rate === undefined) {
+      setAppliedPromo(null);
+      setPromoError('Invalid promo code');
+      return;
+    }
+    setAppliedPromo({ code, rate });
+    setPromoError('');
+    toast.success(`Promo ${code} applied — ${Math.round(rate * 100)}% off`);
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoInput('');
+    setPromoError('');
   };
 
   const handlePay = async () => {
@@ -61,6 +90,8 @@ export function ProceedCheckoutPage({ cartItems, onBack }: ProceedCheckoutPagePr
         formData,
         total,
         subtotal,
+        discount,
+        promoCode: appliedPromo?.code || null,
         timestamp: new Date().toISOString(),
       };
       localStorage.setItem('pendingOrder', JSON.stringify(orderData));
@@ -157,7 +188,38 @@ export function ProceedCheckoutPage({ cartItems, onBack }: ProceedCheckoutPagePr
               </div>
             ))}
             <div className="spread" style={{ marginTop: 16 }}><span className="dim" style={{ fontSize: 14 }}>Subtotal</span><span style={{ fontSize: 14 }}>R{subtotal.toFixed(2)}</span></div>
+            {appliedPromo && (
+              <div className="spread" style={{ marginTop: 10 }}>
+                <span className="dim" style={{ fontSize: 14 }}>Discount ({appliedPromo.code} · {Math.round(appliedPromo.rate * 100)}%)</span>
+                <span style={{ fontSize: 14, color: 'var(--accent)' }}>−R{discount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="spread" style={{ marginTop: 10 }}><span className="dim" style={{ fontSize: 14 }}>Shipping</span><span style={{ fontSize: 12 }}>{freeShip ? <span style={{ color: 'var(--accent)' }}>FREE</span> : <span className="dim">After order</span>}</span></div>
+
+            <div style={{ marginTop: 16 }}>
+              <label className="field-label">Promo code</label>
+              {appliedPromo ? (
+                <div className="spread" style={{ border: '1px solid var(--ink)', padding: '10px 14px' }}>
+                  <span className="mono">{appliedPromo.code}</span>
+                  <button type="button" className="navlink" onClick={handleRemovePromo}>Remove</button>
+                </div>
+              ) : (
+                <div className="row" style={{ gap: 8 }}>
+                  <input
+                    className="input"
+                    type="text"
+                    value={promoInput}
+                    onChange={(e) => { setPromoInput(e.target.value); setPromoError(''); }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyPromo(); } }}
+                    placeholder="Enter code"
+                    style={{ flex: 1 }}
+                  />
+                  <button type="button" className="btn" onClick={handleApplyPromo}>Apply</button>
+                </div>
+              )}
+              {promoError && <p className="mono-sm" style={{ marginTop: 8, color: 'var(--accent)' }}>{promoError}</p>}
+            </div>
+
             <hr className="rule rule-ink" style={{ margin: '16px 0' }} />
             <div className="spread" style={{ marginBottom: 6 }}><span className="display" style={{ fontSize: 20 }}>Total</span><span className="display" style={{ fontSize: 24 }}>R{total.toFixed(2)}</span></div>
             <p className="mono-sm dim" style={{ marginBottom: 18 }}>Excludes shipping</p>

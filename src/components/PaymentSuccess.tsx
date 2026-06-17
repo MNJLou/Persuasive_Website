@@ -27,6 +27,8 @@ interface OrderData {
   };
   total: number;
   subtotal: number;
+  discount?: number;
+  promoCode?: string | null;
 }
 
 interface PaymentSuccessProps {
@@ -68,6 +70,8 @@ export function PaymentSuccess({ onBackToHome, onContinueShopping }: PaymentSucc
                 cartItems: orderData.cartItems,
                 total: orderData.total,
                 subtotal: orderData.subtotal,
+                discount: orderData.discount,
+                promoCode: orderData.promoCode,
               }),
             });
 
