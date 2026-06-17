@@ -6,6 +6,7 @@ import { CartItem } from '../App';
 import { CheckCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { itemTitle, itemVariant } from './CheckoutPage';
+import { PROMO_CODES } from './ProceedCheckoutPage';
 
 interface AdminOrderPageProps {
   onBack: () => void;
@@ -43,6 +44,9 @@ export function AdminOrderPage({ onBack }: AdminOrderPageProps) {
   const [formData, setFormData] = useState<FormData>(emptyForm);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; rate: number } | null>(null);
+  const [promoError, setPromoError] = useState('');
 
   useEffect(() => {
     if (sessionStorage.getItem('adminAuth') === 'true') {
@@ -67,7 +71,28 @@ export function AdminOrderPage({ onBack }: AdminOrderPageProps) {
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price, 0);
-  const total = subtotal;
+  const discount = appliedPromo ? subtotal * appliedPromo.rate : 0;
+  const total = subtotal - discount;
+
+  const handleApplyPromo = () => {
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+    const rate = PROMO_CODES[code];
+    if (rate === undefined) {
+      setAppliedPromo(null);
+      setPromoError('Invalid promo code');
+      return;
+    }
+    setAppliedPromo({ code, rate });
+    setPromoError('');
+    toast.success(`Promo ${code} applied — ${Math.round(rate * 100)}% off`);
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoInput('');
+    setPromoError('');
+  };
 
   const handlePlaceOrder = async () => {
     if (cartItems.length === 0) {
@@ -105,6 +130,8 @@ export function AdminOrderPage({ onBack }: AdminOrderPageProps) {
           cartItems,
           total,
           subtotal,
+          discount,
+          promoCode: appliedPromo?.code || null,
           isAdminOrder: true,
         }),
       });
@@ -141,6 +168,7 @@ export function AdminOrderPage({ onBack }: AdminOrderPageProps) {
     setCartItems([]);
     setFormData(emptyForm);
     setOrderPlaced(false);
+    handleRemovePromo();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -203,9 +231,52 @@ export function AdminOrderPage({ onBack }: AdminOrderPageProps) {
                 </div>
               </div>
             ))}
-            <div className="border-t border-gray-200 pt-3 mt-3 flex justify-between font-semibold text-blue-600">
-              <span>Total</span>
-              <span>R{total.toFixed(2)}</span>
+            <div className="border-t border-gray-200 pt-3 mt-3 space-y-2">
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>Subtotal</span>
+                <span>R{subtotal.toFixed(2)}</span>
+              </div>
+              {appliedPromo && (
+                <div className="flex justify-between text-sm text-green-600 font-medium">
+                  <span>Discount ({appliedPromo.code} · {Math.round(appliedPromo.rate * 100)}%)</span>
+                  <span>−R{discount.toFixed(2)}</span>
+                </div>
+              )}
+
+              <div className="pt-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Promo code</label>
+                {appliedPromo ? (
+                  <div className="flex items-center justify-between border border-gray-300 rounded-md px-3 py-2 text-sm">
+                    <span className="font-mono">{appliedPromo.code}</span>
+                    <button
+                      type="button"
+                      onClick={handleRemovePromo}
+                      className="text-red-600 hover:text-red-800 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      value={promoInput}
+                      onChange={(e) => { setPromoInput(e.target.value); setPromoError(''); }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyPromo(); } }}
+                      placeholder="Enter code"
+                    />
+                    <Button type="button" variant="outline" onClick={handleApplyPromo}>
+                      Apply
+                    </Button>
+                  </div>
+                )}
+                {promoError && <p className="text-sm text-red-600 mt-1">{promoError}</p>}
+              </div>
+
+              <div className="flex justify-between font-semibold text-blue-600 pt-2 border-t border-gray-200">
+                <span>Total</span>
+                <span>R{total.toFixed(2)}</span>
+              </div>
             </div>
           </div>
         )}

@@ -30,6 +30,8 @@ export default async function handler(req, res) {
     cartItems,
     total,
     subtotal,
+    discount,
+    promoCode,
     isAdminOrder
   } = req.body;
 
@@ -74,6 +76,28 @@ export default async function handler(req, res) {
     `
       )
       .join('');
+
+    const hasDiscount = discount && discount > 0;
+    const discountLabel = promoCode ? `Discount (${promoCode})` : 'Discount';
+
+    // Customer email: 2-column table (Item | Price).
+    const customerDiscountRowHtml = hasDiscount
+      ? `
+                  <tr style="background-color: #f9fafb;">
+                    <td style="padding: 8px; font-weight: bold; color: #16a34a;">${discountLabel}</td>
+                    <td style="padding: 8px; text-align: right; font-weight: bold; color: #16a34a;">−R${discount.toFixed(2)}</td>
+                  </tr>`
+      : '';
+
+    // Owner email: 3-column table (Item | Size | Price).
+    const ownerDiscountRowHtml = hasDiscount
+      ? `
+                  <tr style="background-color: white;">
+                    <td style="padding: 8px; font-weight: bold; color: #16a34a;">${discountLabel}</td>
+                    <td></td>
+                    <td style="padding: 8px; text-align: right; font-weight: bold; color: #16a34a;">−R${discount.toFixed(2)}</td>
+                  </tr>`
+      : '';
 
     const customerEmailHtml = `
       <!DOCTYPE html>
@@ -165,6 +189,7 @@ export default async function handler(req, res) {
                     <td style="padding: 8px; font-weight: bold;">Subtotal</td>
                     <td style="padding: 8px; text-align: right; font-weight: bold;">R${subtotal.toFixed(2)}</td>
                   </tr>
+                  ${customerDiscountRowHtml}
                   <tr class="total-row">
                     <td style="padding: 12px;">Total</td>
                     <td style="padding: 12px; text-align: right;">R${total.toFixed(2)}</td>
@@ -361,6 +386,7 @@ export default async function handler(req, res) {
                     <td></td>
                     <td style="padding: 8px; text-align: right; font-weight: bold;">R${subtotal.toFixed(2)}</td>
                   </tr>
+                  ${ownerDiscountRowHtml}
                   <tr class="total-row" style="background-color: #fef2f2;">
                     <td style="padding: 12px;">TOTAL (excluding shipping)</td>
                     <td></td>
