@@ -112,4 +112,44 @@ export const capColorways: Colorway[] = [
 
 export const CAP_PRICE = 150.0;
 
+// ---------------- CROP TOP config (NEW) ----------------
+// One size, always available. Two colourways with fixed matched Pink
+// embroidery — each carries its own name + price (unlike the cap).
+export interface CropTop {
+  name: string;        // colourway display, e.g. "White"
+  key: string;         // stock/cart key, e.g. "White"
+  value: string;       // swatch colour
+  border?: boolean;
+  productName: string; // heading + cart title, e.g. "Oversized Crop Top"
+  price: number;
+  embroidery: ColorOption;
+  images: string[];
+}
+
+function cdnImgs(folder: string, files: string[]) {
+  return files.map((f) => `${CDN}/${encodeURIComponent(folder)}/${encodeURIComponent(f)}`);
+}
+
+export const cropTopColorways: CropTop[] = [
+  {
+    name: 'White',
+    key: 'White',
+    value: '#FFFFFF',
+    border: true,
+    productName: 'Oversized Crop Top',
+    price: 450.0,
+    embroidery: { name: 'Pink', value: '#EC4899' },
+    images: cdnImgs('Crop Top White Pink Embroidery', ['White Pink Front.jpeg', 'White Pink Back.jpeg']),
+  },
+  {
+    name: 'Black',
+    key: 'Black',
+    value: '#0c0c0c',
+    productName: 'Crop Top',
+    price: 400.0,
+    embroidery: { name: 'Pink', value: '#EC4899' },
+    images: cdnImgs('Crop Top Black Pink Embroidery', ['Black Pink Front.jpeg', 'Black Pink Back.jpeg']),
+  },
+];
+
 export const BRAND_CITY = 'Johannesburg';

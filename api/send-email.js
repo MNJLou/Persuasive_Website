@@ -58,6 +58,9 @@ export default async function handler(req, res) {
       if (item.productType === 'cap' || item.productName === 'Cap') {
         return `${item.productName || 'Cap'} — ${item.shirtColor} / ${item.embroideryColor} thread (${item.size})`;
       }
+      if (item.productType === 'croptop') {
+        return `${item.productName || 'Crop Top'} — ${item.shirtColor} / ${item.embroideryColor} thread (${item.size})`;
+      }
       return `${item.shirtColor} shirt with ${item.embroideryColor} embroidery (${item.size})`;
     };
 
