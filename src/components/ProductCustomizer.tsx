@@ -16,6 +16,7 @@ import {
   teePrice,
   capColorways,
   CAP_PRICE,
+  cropTopColorways,
   SIZE_GUIDE,
   type ColorOption,
 } from './persuasive/data';
@@ -282,9 +283,76 @@ function CapCustomizer({ onAdd }: { onAdd: (i: CartItem) => void }) {
   );
 }
 
+// ---------- CROP TOP customizer ----------
+function CropTopCustomizer({ onAdd }: { onAdd: (i: CartItem) => void }) {
+  const [way, setWay] = useState(cropTopColorways[0]);
+  const emb = way.embroidery;
+  const add = () => {
+    onAdd({
+      id: '',
+      shirtColor: way.key,
+      embroideryColor: emb.name,
+      size: 'One Size',
+      price: way.price,
+      image: way.images[0],
+      productType: 'croptop',
+      productName: way.productName,
+      swatch: way.value,
+      embSwatch: emb.value,
+    });
+    toast.success('Added to cart!', { description: `${way.productName} · ${way.name} / ${emb.name} thread` });
+  };
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.05fr) minmax(0,0.95fr)', gap: 'clamp(28px,4vw,64px)', alignItems: 'start' }} className="cust-grid">
+      <Gallery images={way.images} bg={way.key === 'Black' ? '#0c0c0c' : 'var(--paper-2)'} />
+
+      <div className="stack" style={{ gap: 0 }}>
+        <div className="spread" style={{ alignItems: 'flex-start' }}>
+          <div>
+            <div className="mono dim" style={{ marginBottom: 12 }}>Apparel / 003 — New</div>
+            <h1 className="display" style={{ fontSize: 'clamp(32px,4.4vw,56px)' }}>{way.productName}</h1>
+          </div>
+          <div className="display" style={{ fontSize: 34, whiteSpace: 'nowrap' }}>R{way.price.toFixed(0)}</div>
+        </div>
+
+        <div className="tag" style={{ alignSelf: 'flex-start', marginTop: 18, borderColor: 'var(--ink)' }}><Icon.Truck size={14} /> Buy 2 — Free shipping</div>
+
+        <p style={{ color: 'var(--muted)', fontSize: 15, marginTop: 22, maxWidth: 460 }}>
+          Cropped fit in heavyweight cotton with signature PER·SUA·SIVE embroidery. Pick your colourway — pink thread throughout.
+        </p>
+
+        <hr className="rule" style={{ margin: '30px 0' }} />
+
+        {/* Colourway */}
+        <label className="field-label">Colourway — <span style={{ color: 'var(--ink)' }}>{way.name}</span></label>
+        <div className="row" style={{ gap: 12, flexWrap: 'wrap', marginBottom: 28 }}>
+          {cropTopColorways.map((c) => <Swatch key={c.key} color={c} active={way.key === c.key} onClick={() => setWay(c)} label={c.name} />)}
+        </div>
+
+        {/* Thread (fixed per colourway) */}
+        <label className="field-label">Thread colour — <span style={{ color: 'var(--ink)' }}>{emb.name}</span></label>
+        <div className="row" style={{ gap: 12, alignItems: 'center', marginBottom: 28 }}>
+          <span className="swatch" data-active="true" style={{ background: emb.value, cursor: 'default' }}></span>
+          <span className="mono dim">Matched to colourway</span>
+        </div>
+
+        {/* Size */}
+        <label className="field-label">Size</label>
+        <div className="seg" style={{ alignSelf: 'flex-start', marginBottom: 32 }}>
+          <button data-active={true} style={{ cursor: 'default' }}>One Size</button>
+        </div>
+
+        <button className="btn btn-block btn-lg" onClick={add}>Add to cart — R{way.price.toFixed(0)} <Icon.Arrow className="arrow" /></button>
+
+        <FeatureList items={['Heavyweight cotton', 'Embroidered PER·SUA·SIVE', 'Cropped fit', 'Pink thread', 'Machine washable']} />
+      </div>
+    </div>
+  );
+}
+
 // ---------- Wrapper with product switcher ----------
 export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
-  const [tab, setTab] = useState<'tee' | 'cap'>('tee');
+  const [tab, setTab] = useState<'tee' | 'cap' | 'croptop'>('tee');
   const [stock, setStock] = useState<StockRow[]>([]);
 
   useEffect(() => {
@@ -314,10 +382,15 @@ export function ProductCustomizer({ onAddToCart }: ProductCustomizerProps) {
           <button className="prodtab" data-active={tab === 'cap'} onClick={() => setTab('cap')}>
             <span className="mono">Cap</span><span className="mono-sm" style={{ color: 'var(--accent)' }}>New · R150</span>
           </button>
+          <button className="prodtab" data-active={tab === 'croptop'} onClick={() => setTab('croptop')}>
+            <span className="mono">Crop Top</span><span className="mono-sm" style={{ color: 'var(--accent)' }}>New · From R400</span>
+          </button>
         </div>
       </div>
       <div className="wrap section" style={{ paddingTop: 'clamp(36px,5vw,64px)', paddingBottom: 'clamp(48px,7vw,96px)' }}>
-        {tab === 'tee' ? <TeeCustomizer onAdd={onAddToCart} stock={stock} /> : <CapCustomizer onAdd={onAddToCart} />}
+        {tab === 'tee' && <TeeCustomizer onAdd={onAddToCart} stock={stock} />}
+        {tab === 'cap' && <CapCustomizer onAdd={onAddToCart} />}
+        {tab === 'croptop' && <CropTopCustomizer onAdd={onAddToCart} />}
       </div>
     </div>
   );
