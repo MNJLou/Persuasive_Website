@@ -130,6 +130,8 @@ function cdnImgs(folder: string, files: string[]) {
   return files.map((f) => `${CDN}/${encodeURIComponent(folder)}/${encodeURIComponent(f)}`);
 }
 
+export const CROP_TOP_SIZES = ['XS', 'Small', 'Medium', 'Large'];
+
 export const cropTopColorways: CropTop[] = [
   {
     name: 'White',
