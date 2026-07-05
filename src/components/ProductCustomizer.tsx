@@ -17,6 +17,7 @@ import {
   capColorways,
   CAP_PRICE,
   cropTopColorways,
+  CROP_TOP_SIZES,
   SIZE_GUIDE,
   type ColorOption,
 } from './persuasive/data';
@@ -286,13 +287,14 @@ function CapCustomizer({ onAdd }: { onAdd: (i: CartItem) => void }) {
 // ---------- CROP TOP customizer ----------
 function CropTopCustomizer({ onAdd }: { onAdd: (i: CartItem) => void }) {
   const [way, setWay] = useState(cropTopColorways[0]);
+  const [size, setSize] = useState('Medium');
   const emb = way.embroidery;
   const add = () => {
     onAdd({
       id: '',
       shirtColor: way.key,
       embroideryColor: emb.name,
-      size: 'One Size',
+      size,
       price: way.price,
       image: way.images[0],
       productType: 'croptop',
@@ -300,7 +302,7 @@ function CropTopCustomizer({ onAdd }: { onAdd: (i: CartItem) => void }) {
       swatch: way.value,
       embSwatch: emb.value,
     });
-    toast.success('Added to cart!', { description: `${way.productName} · ${way.name} / ${emb.name} thread` });
+    toast.success('Added to cart!', { description: `${way.productName} · ${way.name} / ${emb.name} thread · ${size}` });
   };
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.05fr) minmax(0,0.95fr)', gap: 'clamp(28px,4vw,64px)', alignItems: 'start' }} className="cust-grid">
@@ -337,9 +339,14 @@ function CropTopCustomizer({ onAdd }: { onAdd: (i: CartItem) => void }) {
         </div>
 
         {/* Size */}
-        <label className="field-label">Size</label>
-        <div className="seg" style={{ alignSelf: 'flex-start', marginBottom: 32 }}>
-          <button data-active={true} style={{ cursor: 'default' }}>One Size</button>
+        <label className="field-label" style={{ marginBottom: 10 }}>Size — <span style={{ color: 'var(--ink)' }}>{size}</span></label>
+        <div className="row" style={{ gap: 8, flexWrap: 'wrap', marginBottom: 32 }}>
+          {CROP_TOP_SIZES.map((s) => (
+            <button key={s} onClick={() => setSize(s)}
+              style={{ minWidth: 54, padding: '13px 14px', border: '1px solid var(--ink)', background: size === s ? 'var(--ink)' : 'transparent', color: size === s ? '#fff' : 'var(--ink)', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 12, letterSpacing: '0.08em' }}>
+              {s}
+            </button>
+          ))}
         </div>
 
         <button className="btn btn-block btn-lg" onClick={add}>Add to cart — R{way.price.toFixed(0)} <Icon.Arrow className="arrow" /></button>
