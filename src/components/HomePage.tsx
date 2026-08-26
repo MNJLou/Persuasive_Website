@@ -55,6 +55,7 @@ export function HomePage({ onShopNow }: HomePageProps) {
     { icon: <Icon.Needle size={26} />, t: 'Embroidered to order', d: 'Every piece is stitched after you order — your colourway, your thread, no two the same.' },
     { icon: <Icon.Cotton size={26} />, t: '100% organic cotton', d: 'Heavyweight, pre-shrunk and built to outlast the season. A premium hand-feel from the first wear.' },
     { icon: <Icon.Truck size={26} />, t: '3—5 day dispatch', d: `Made and shipped from ${BRAND_CITY} within three to five business days. Buy two, shipping is on us.` },
+    { icon: <Icon.Exchange size={26} />, t: '21-day exchanges', d: 'Not the right fit? You can exchange your shirt within 21 days of delivery. Please note all sales are final — we are unable to offer refunds.' },
   ];
 
   return (
@@ -90,9 +91,9 @@ export function HomePage({ onShopNow }: HomePageProps) {
       <section className="section" style={{ background: 'var(--paper-2)', borderBlock: '1px solid var(--line)' }}>
         <div className="wrap">
           <div className="eyebrow-row mono dim reveal" style={{ marginBottom: 40 }}><span className="ln"></span> 02 — Why Persuasive</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 0, borderTop: '1px solid var(--ink)' }} className="feat-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, borderTop: '1px solid var(--ink)' }} className="feat-grid">
             {features.map((f, i) => (
-              <div key={i} className="reveal" style={{ padding: '40px 32px 40px 0', borderRight: i < 2 ? '1px solid var(--line)' : 'none', display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <div key={i} className="reveal" style={{ padding: '40px 32px 40px 0', borderRight: i < features.length - 1 ? '1px solid var(--line)' : 'none', display: 'flex', flexDirection: 'column', gap: 18 }}>
                 <div className="spread"><span style={{ color: 'var(--ink)' }}>{f.icon}</span><span className="mono-sm dim">0{i + 1}</span></div>
                 <h3 className="display" style={{ fontSize: 24 }}>{f.t}</h3>
                 <p style={{ color: 'var(--muted)', fontSize: 15, margin: 0 }}>{f.d}</p>
