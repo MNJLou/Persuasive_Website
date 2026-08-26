@@ -34,6 +34,9 @@ export const Icon = {
   Cotton: ({ size = 22, className }: IconProps) => (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 3v18M5 9c0 4 3 7 7 7s7-3 7-7M5 9a3 3 0 1 1 4-3M19 9a3 3 0 1 0-4-3M9 6a3 3 0 1 1 6 0" /></svg>
   ),
+  Exchange: ({ size = 22, className }: IconProps) => (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 2l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3" /></svg>
+  ),
 };
 
 // ---------------- Reveal-on-scroll ----------------
